@@ -58,7 +58,7 @@ select choice in "Create Database" "List Database" "Drop Database" "Connect Data
 			#Part 1-2 #--running Listing Database script--#
 		;;
 		"Drop Database" )
-            echo "Go to Drop Database"
+            source Drop_DB
 			#Part 1-3 #--running Dropping Database script--#
 		;;
 		"Connect Database" )

@@ -1,0 +1,51 @@
+#!/user/bin/bash
+
+
+#!/usr/bin/bash
+
+# --------------------------------------------------------------------------------------------------------------
+#change color to blue before printing
+# Color variables
+BOLD="\033[1m"
+red='\033[0;31m'
+green='\033[0;32m'
+yellow='\033[0;33m'
+blue='\033[0;34m'
+magenta='\033[0;35m'
+cyan='\033[0;36m'
+# Clear the color after that
+clear='\033[0m'
+# Background Color variables
+bg_red='\033[0;41m'
+bg_green='\033[0;42m'
+bg_yellow='\033[0;43m'
+bg_blue='\033[0;44m'
+bg_magenta='\033[0;45m'
+bg_cyan='\033[0;46m'
+# --------------------------------------------------------------------------------------------------------------
+#Function of checking existance of the given DB_Name
+Drop_DB_Func () {
+    read -p "Enter the Database name : " name
+    shopt -s extglob
+    while true
+    do
+       
+        if [[ -e $name ]];then
+            #rm -r $name
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            echo -e "${green} * $name Database was droped successfully.${clear}"           
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            break
+        else
+            echo -e "${yellow}----------------------------- ---------------------------------------${clear}"
+            echo -e "${red} * $name not found .${clear}"   
+            echo -e "${red} * Please Enter Database Name again .${clear}"          
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+           Drop_DB_Func
+        fi
+    done
+}
+
+#CREATING DATABASE
+
+Drop_DB_Func
