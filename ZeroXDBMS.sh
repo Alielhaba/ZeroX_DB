@@ -50,11 +50,11 @@ select choice in "Create Database" "List Database" "Drop Database" "Connect Data
 	echo -e "${green}$choice ${clear}"
 	case $choice in 
 		"Create Database" )
-            echo "Go to Create Database"
+            createdb
 			#Part 1-1 #--running create Database script--#
 		;;
 		"List Database" )
-            echo "Go to List Database"
+            listdb
 			#Part 1-2 #--running Listing Database script--#
 		;;
 		"Drop Database" )
