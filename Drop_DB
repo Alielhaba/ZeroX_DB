@@ -1,9 +1,6 @@
 #!/user/bin/bash
 
-
-#!/usr/bin/bash
-
-# --------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------
 #change color to blue before printing
 # Color variables
 BOLD="\033[1m"
@@ -46,6 +43,6 @@ Drop_DB_Func () {
     done
 }
 
-#CREATING DATABASE
+#Droping DATABASE
 
 Drop_DB_Func
