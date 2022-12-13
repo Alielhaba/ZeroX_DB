@@ -21,15 +21,11 @@ bg_blue='\033[0;44m'
 bg_magenta='\033[0;45m'
 bg_cyan='\033[0;46m'
 # --------------------------------------------------------------------------------------------------------------
-
 #Printing Welcomming
-echo -e "${magenta}----------------------------------------------------------${clear}"
-echo -e "                  ${blue}Welcome to ZeroX-DBMS${clear}   "
-echo -e "${magenta}----------------------------------------------------------${clear}"
-
+source Logo
 #Printing Hints
 echo ""
-echo -e "${red} Hint -- Our Datbase Engine works on HADatabase Directory By Default${clear}"
+echo -e "${green}Hint -- Our Datbase Engine works on HADatabase Directory By Default${clear}"
 echo ""
 
 #Go to Directory of Databases
@@ -44,7 +40,7 @@ cd $PWD/$direction
 
 #Listing Database Options 
 database-options() {
-echo -e "${red}Hint : Choose only Number from the following list${clear}"
+echo -e "${green}Hint : Choose only Number from the following list${clear}"
 select choice in "Create Database" "List Database" "Drop Database" "Connect Database" "Quit"
    do
 	echo -e "${green}$choice ${clear}"
@@ -63,7 +59,7 @@ select choice in "Create Database" "List Database" "Drop Database" "Connect Data
 		;;
 		"Connect Database" )
             source Connect_DB
-			#Part 1-4 #--running Dropping Database script--#	
+			#Part 1-4 #--running Connecting Database script--#	
 		;;
         "Quit" )
             exit

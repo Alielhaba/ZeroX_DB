@@ -34,7 +34,7 @@ bg_cyan='\033[0;46m'
                             source List_Table 
                             ;;		
                         "create table" )
-                            echo "Creat table" 
+                            source Create_Table 
                             ;;
                         "drop table" ) 
                             echo "Drop table"  
