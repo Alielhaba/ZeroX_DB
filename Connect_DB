@@ -26,12 +26,12 @@ bg_cyan='\033[0;46m'
         while true
         do
             if [[ -e $Connect_DB ]];then
-                #cd $Connect_DB
+                cd $Connect_DB
                 select menu in "list table" "create table" "drop table" "insert into table" "select from table" "delete from table" "update table" "Exit"
                     do 
                     case $menu in 
                         "list table" ) 
-                            echo "List table" 
+                            source List_Table 
                             ;;		
                         "create table" )
                             echo "Creat table" 
@@ -52,6 +52,7 @@ bg_cyan='\033[0;46m'
                             echo "Update table"  
                             ;;	
                         "Exit" ) 
+                         cd ..
                             break;  
                             ;;			
                         * )
@@ -68,6 +69,7 @@ bg_cyan='\033[0;46m'
                 echo -e "${red} * $Connect_DB Database not found .${clear}"   
                 echo -e "${red} * Please Enter Database Name again .${clear}"          
                 echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                cd ..
                 Connect_DB_Func
             fi
 

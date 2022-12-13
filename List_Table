@@ -1,0 +1,12 @@
+#!/user/bin/bash
+
+#Listing Files inside the Database
+
+if [[ `ls` == "" ]];then
+    echo -e "${yellow}--------------------------------------------------------------------${clear}"
+    echo -e "${red}Sir..There is no Database yet${clear}"
+    echo -e "${yellow}--------------------------------------------------------------------${clear}"
+else
+    echo -e "${BOLD}`ls`${clear}"
+fi
+
