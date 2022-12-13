@@ -69,10 +69,8 @@ bg_cyan='\033[0;46m'
                 echo -e "${red} * $Connect_DB Database not found .${clear}"   
                 echo -e "${red} * Please Enter Database Name again .${clear}"          
                 echo -e "${yellow}--------------------------------------------------------------------${clear}"
-                cd ..
                 Connect_DB_Func
             fi
-
         done
     }
 

@@ -46,9 +46,6 @@ add_name_check_const_Exist_fun () {
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
             add_name_check_const_Exist_fun
         else
-            echo -e "${yellow}--------------------------------------------------------------------${clear}"
-            echo -e "${green} *  $name Database Is Created Successfully.${clear}"           
-            echo -e "${yellow}--------------------------------------------------------------------${clear}"
             mkdir $name
             cd $name
             break
@@ -57,5 +54,25 @@ add_name_check_const_Exist_fun () {
 }
 
 #CREATING DATABASE
-
-add_name_check_const_Exist_fun 
+create_db_fun (){
+    echo -e "${magenta}Hint : Choose only Number from the following list : ${clear}"
+    select dbcreation in "Add New Database" "Quit"
+    do
+        echo -e "${magenta}$dbcreation${clear}"
+        case $dbcreation in
+            "Add New Database" )
+                add_name_check_const_Exist_fun
+                echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                echo -e "${green} *  Database is Created Successfully.${clear}"           
+                echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            ;;
+            "Quit" )
+                exit 
+            ;;
+            * )
+                echo -e "${red}Entered Choice is not available***${clear}"
+                create_db_fun
+        esac
+    done
+}
+create_db_fun

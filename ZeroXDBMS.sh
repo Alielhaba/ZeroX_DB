@@ -66,7 +66,7 @@ select choice in "Create Database" "List Database" "Drop Database" "Connect Data
         ;;
 		* )
 			## add condition to make user loop if his choice is wrong##
-			echo -e "${yellow}Please re-enter a correct number -- only number${clear}"
+			echo -e "${red}Entered Choice is not available${clear}"
             database-options
 	esac
    done 
