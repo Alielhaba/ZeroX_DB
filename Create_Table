@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/user/bin/bash
 
 # --------------------------------------------------------------------------------------------------------------
 #change color to blue before printing
@@ -22,7 +22,7 @@ bg_cyan='\033[0;46m'
 # --------------------------------------------------------------------------------------------------------------
 #Function of checking Constrains on the given name
 add_name_check_const_Exist_fun () {
-    read -p "Enter the Database name : " name
+    read -p "Enter the Table name : " name
     shopt -s extglob
     while true
     do
@@ -36,26 +36,25 @@ add_name_check_const_Exist_fun () {
             break
         elif [[ $name == [0-99999]* || $name == *[0-99999]*  ]]; then
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
-            echo -e "${red} *  Given name shoud not contain numbers.${clear}"           
+            echo -e "${red} * Given name shoud not contain numbers.${clear}"           
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
             add_name_check_const_Exist_fun
             break
         elif [[ -e $name ]];then
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
-            echo -e "${red} *  There is an existance file with the same name.${clear}"           
+            echo -e "${red} * There is an Existance File With The Same Name.${clear}"           
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
             add_name_check_const_Exist_fun
         else
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
-            echo -e "${green} *  $name Database Is Created Successfully.${clear}"           
+            echo -e "${green} * The Table Is Created Successfully.${clear}"           
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
-            mkdir $name
-            cd $name
-            break
+            touch $name
+            
         fi
+        break;
     done
 }
 
-#CREATING DATABASE
 
-add_name_check_const_Exist_fun 
+add_name_check_const_Exist_fun
