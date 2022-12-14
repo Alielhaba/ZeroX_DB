@@ -21,16 +21,23 @@ bg_blue='\033[0;44m'
 bg_magenta='\033[0;45m'
 bg_cyan='\033[0;46m'
 # --------------------------------------------------------------------------------------------------------------
-
+#Installing toilet figlet
 #Printing Welcomming
-echo -e "${magenta}----------------------------------------------------------${clear}"
-echo -e "                  ${blue}Welcome to ZeroX-DBMS${clear}   "
-echo -e "${magenta}----------------------------------------------------------${clear}"
-
+source Logo
 #Printing Hints
 echo ""
-echo -e "${red} Hint -- Our Datbase Engine works on HADatabase Directory By Default${clear}"
+echo -e "${green}Hint -- Our Datbase Engine works on HADatabase Directory By Default${clear}"
 echo ""
+
+#Function of rechoosing 
+re_choose_from_main_list_fun () {
+	echo -e "${yellow}Hint : Choose only Number from the following list${clear}"
+	echo -e "${cyan}1) Create Database ${clear}"
+	echo -e "${cyan}2) List Database ${clear}"
+	echo -e "${cyan}3) Drop Database ${clear}"
+	echo -e "${cyan}4) Connect Database ${clear}"
+	echo -e "${cyan}5) Quit ${clear}"
+}
 
 #Go to Directory of Databases
 direction=""
@@ -44,33 +51,37 @@ cd $PWD/$direction
 
 #Listing Database Options 
 database-options() {
-echo -e "${red}Hint : Choose only Number from the following list${clear}"
+echo -e "${green}Hint : Choose only Number from the following list${clear}"
 select choice in "Create Database" "List Database" "Drop Database" "Connect Database" "Quit"
    do
 	echo -e "${green}$choice ${clear}"
 	case $choice in 
 		"Create Database" )
             createdb
+			re_choose_from_main_list_fun
 			#Part 1-1 #--running create Database script--#
 		;;
 		"List Database" )
             listdb
+			re_choose_from_main_list_fun
 			#Part 1-2 #--running Listing Database script--#
 		;;
 		"Drop Database" )
-            echo "Go to Drop Database"
+            source Drop_DB
+			re_choose_from_main_list_fun
 			#Part 1-3 #--running Dropping Database script--#
 		;;
 		"Connect Database" )
-            echo "Go to Connect Database"
-			#Part 1-4 #--running Dropping Database script--#	
+            source Connect_DB
+			re_choose_from_main_list_fun
+			#Part 1-4 #--running Connecting Database script--#	
 		;;
         "Quit" )
             exit
         ;;
 		* )
 			## add condition to make user loop if his choice is wrong##
-			echo -e "${yellow}Please re-enter a correct number -- only number${clear}"
+			echo -e "${red}Entered Choice is not available${clear}"
             database-options
 	esac
    done 

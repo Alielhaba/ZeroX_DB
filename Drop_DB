@@ -20,6 +20,12 @@ bg_blue='\033[0;44m'
 bg_magenta='\033[0;45m'
 bg_cyan='\033[0;46m'
 # --------------------------------------------------------------------------------------------------------------
+#Rechoose drop database options
+rechoose_drop_db_options (){
+    echo -e "${magenta}Please re-choose from the following list${clear}"
+    echo -e "${cyan}1) Drop Database ${clear}"
+	echo -e "${cyan}2) Cancel ${clear}"
+}
 #Function of checking existance of the given DB_Name
 Drop_DB_Func () {
     read -p "Enter the Database name : " name
@@ -28,13 +34,16 @@ Drop_DB_Func () {
     do
        
         if [[ -e $name ]];then
-            #rm -r $name
-            echo -e "${yellow}--------------------------------------------------------------------${clear}"
-            echo -e "${green} * $name Database was droped successfully.${clear}"           
-            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            rm -r $name
+                echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                echo -e "${green} * $name Database was droped successfully.${clear}"           
+                echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            break
+        elif [[ $name = "exit" ]];then
+            rechoose_drop_db_options
             break
         else
-            echo -e "${yellow}----------------------------- ---------------------------------------${clear}"
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
             echo -e "${red} * $name not found .${clear}"   
             echo -e "${red} * Please Enter Database Name again .${clear}"          
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
@@ -44,5 +53,24 @@ Drop_DB_Func () {
 }
 
 #Droping DATABASE
-
-Drop_DB_Func
+drop_db (){
+    echo -e "${magenta}Hint : Choose only Number from the following list : ${clear}"
+    select dbdrop in "Drop Database" "Cancel"
+    do
+        echo -e "${magenta} $dbdrop ${clear}"
+        case $dbdrop in
+            "Drop Database" )
+                Drop_DB_Func
+            ;;
+            "Cancel" )
+                rechoose_drop_db_options
+                break
+            ;;
+            * )
+                echo -e "${red}Entered Choice is not available***${clear}"
+                drop_db
+                source zeroXDBMS.sh
+        esac
+    done
+}
+drop_db

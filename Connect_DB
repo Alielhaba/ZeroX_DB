@@ -44,7 +44,7 @@ Connect_DB_Func () {
                         echo "Insert table" 
                         ;;
                     "select from table" )  
-                        echo "Select From table" 
+                        source Select_From 
                         ;;		
                     "delete from table" )
                         echo "Delete From table" 
