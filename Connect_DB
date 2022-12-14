@@ -1,0 +1,76 @@
+#!/user/bin/bash
+
+# ------------------------------------------------------------------------------------------------------------
+#change color to blue before printing
+# Color variables
+BOLD="\033[1m"
+red='\033[0;31m'
+green='\033[0;32m'
+yellow='\033[0;33m'
+blue='\033[0;34m'
+magenta='\033[0;35m'
+cyan='\033[0;36m'
+# Clear the color after that
+clear='\033[0m'
+# Background Color variables
+bg_red='\033[0;41m'
+bg_green='\033[0;42m'
+bg_yellow='\033[0;43m'
+bg_blue='\033[0;44m'
+bg_magenta='\033[0;45m'
+bg_cyan='\033[0;46m'
+# --------------------------------------------------------------------------------------------------------------
+#Function of Database Conncection
+Connect_DB_Func () {
+    read -p "Enter the Database name : " Connect_DB
+    shopt -s extglob
+    while true
+    do
+        if [[ -e $Connect_DB ]];then
+            cd $Connect_DB
+            select menu in "list table" "create table" "drop table" "insert into table" "select from table" "delete from table" "update table" "Exit"
+                do 
+                case $menu in 
+                    "list table" ) 
+                        source List_Table 
+                        ;;		
+                    "create table" )
+                        source Create_Table 
+                        ;;
+                    "drop table" ) 
+                        echo "Drop table"  
+                        ;;	
+                    "insert into table" )
+                        echo "Insert table" 
+                        ;;
+                    "select from table" )  
+                        echo "Select From table" 
+                        ;;		
+                    "delete from table" )
+                        echo "Delete From table" 
+                        ;; 
+                    "update table" ) 
+                        echo "Update table"  
+                        ;;	
+                    "Exit" ) 
+                        cd ..
+                        break;  
+                        ;;			
+                    * )
+                        echo -e "${red} * Enter a valid number .${clear}" 
+                        
+                    esac
+                done
+            break;  
+        else
+            echo -e "${yellow}----------------------------- ---------------------------------------${clear}"
+            echo -e "${red} * $Connect_DB Database not found .${clear}"   
+            echo -e "${red} * Please Enter Database Name again .${clear}"          
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            Connect_DB_Func
+        fi
+
+    done
+}
+#Database Conncection
+Connect_DB_Func
