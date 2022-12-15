@@ -49,8 +49,7 @@ add_name_check_const_Exist_fun () {
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
             echo -e "${green} * The Table Is Created Successfully.${clear}"           
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
-            touch $name
-            
+            touch $name    
         fi
         break;
     done

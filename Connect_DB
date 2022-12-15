@@ -69,7 +69,6 @@ Connect_DB_Func () {
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
             Connect_DB_Func
         fi
-
     done
 }
 #Database Conncection

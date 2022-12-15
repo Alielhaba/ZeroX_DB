@@ -34,21 +34,20 @@ rechoose_select_from_options () {
 
 #--------------Function Select all Data in table ---------------------------------------------------------
 select_all_fun () {
-    read -p "Enter the table name : " tbname
+    read -p "Enter the table name : " tballname
     shopt -s extglob
     while true
     do
-        if [[ -e $tbname ]];then
-            echo -e "${yellow} Metadata of the table :${clear}"
-            sed -n '1,3p' $PWD/$tbname
-            sed -n'3,$d p' $tbname
+        if [[ -e $tballname ]];then
+            echo -e "${bg_yellow} ${tballname} Table Contents:${clear}"
+            cat ${tballname}
             break
         elif [[ $name = "exit" ]];then
             rechoose_select_from_options
             break
         else
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
-            echo -e "${red} * $tbname not found .${clear}"   
+            echo -e "${red} * $tballname not found .${clear}"   
             echo -e "${red} * Please Enter Table Name again .${clear}"          
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
             select_all_fun
@@ -63,27 +62,28 @@ select_by_row_fun () {
     do
         if [[ -e $tbname ]];then
             echo -e "${yellow} Metadata of the table :${clear}"
-            sed -n '1,3p' $tbname
+            sed -n '${yellow}1,3${clear}p' $tbname
             select numrow in "Select by Primary Key" "Select by row number" "Select by a Specific Value" "Cancel"
             do 
-                echo $numrow
+                echo -e "${bg_cyan}$numrow${clear}"
                 case $numrow in 
                 "Select by Primary Key" )
                 # Select By Primary Key Function --------------------
                     select-by-pk () {
-                        echo -e "${red} Hint: If you want to go back enter ${clear} ${yellow}(exit)${clear}${red}..${clear}"
+                        echo -e "${bg_red} Hint: If you want to go back enter (exit)..${clear}"
                         read -p "Enter Primary Key Value : " pkvalue
                         while true
                         do
                             if [[ `cut -d : -f1 $tbname | grep "$pkvalue"` -ne \0 ]];then
-                                awk '
+                                echo -e "${bg_yellow}The row of $pkvalue Primary Key Value: ${clear}"
+                                awk -v X="$pkvalue" '
                                 BEGIN{FS=":"}
                                 {
-                                    if($1 == $pkvalue){
-                                        print NR,$0;
+                                    if ($1==X){
+                                        print NR,$0
                                     }
                                 } 
-                                END{print""}' $tbname
+                                END{}' $PWD/$tbname
                                 break
                             elif [[ $pkvalue = "exit" ]];then
                                 select_by_row_fun
@@ -105,10 +105,10 @@ select_by_row_fun () {
                 # Select By row number Function ----------------------------------
                     select_row_number () {
                         read -p "Enter the number of row you want to view" rwnumber 
-                        echo -e "${red} Hint: If you want to go back enter ${clear} ${yellow}(exit)${clear}${red}...${clear}"
+                        echo -e "${bg_red} Hint: If you want to go back enter (exit)...${clear}"
                         case $rwnumber in 
                         +[0-999] )
-                            sed -n '${rwnumber}p'$PWD
+                            sed -n '${rwnumber}p'$PWD/$tbname
                         ;;
                         "exit" )
                             select_by_row_fun
@@ -128,23 +128,26 @@ select_by_row_fun () {
                 # Select By Specific Value Function ---------------------------------
                     select_by_spec_val () {
                         read -p "Enter The Searching Targeted Value : " specvalue
-                        if [[ `grep "$specvalue" $tbname` != "" ]];then
-                            awk '
-                            BEGIN{FS=":"}
-                            {
-                                i=1;
-                                while($i <= NF ){
-                                    if ($specvalue == $i){
-                                       print $0
-                                }                            
-                                i++;   
-                            }
-                            END{print("")}' $tbname
-                        else
+                        if [[ `grep "$specvalue" $tbname` == false ]];then
                             echo -e "${yellow}--------------------------------------------------------------------${clear}"
                             echo -e "${red} * Your entery is not Exist.${clear}"   
                             echo -e "${yellow}--------------------------------------------------------------------${clear}"
                             select_by_spec_val
+                        else
+                            echo -e "${bg_yellow}The row that contain Value of $specvalue: ${clear}"
+                            grep "$specvalue" $tbname
+                            #awk -v Y="$specvalue"'
+                            #BEGIN{FS=":"}
+                            # {   
+                            #    i=1;
+                            #    while(i <= NF){
+                            #        if ($i == Y){
+                            #            print $0
+                            #        }  
+                            #    }
+                            #    i++;                            
+                            #}
+                            #END{}' $PWD/$tbname
                         fi 
                     }
                     # Select By Specific Value Function ------------------------------------- Ended
@@ -157,7 +160,7 @@ select_by_row_fun () {
             done
         elif [[ $tbname == "exit" ]];then
             rechoose_select_from_options
-            exit
+            break
         else
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
             echo -e "${red} * $tbname not found .${clear}"   
@@ -171,17 +174,15 @@ select_by_row_fun () {
 
 
 
-
-
 #Select from Function
 select_from_fun (){
     echo -e "${bg_magenta}Hint : choose a number from the following list :${clear}"
-    select selection in "Select all data in a table" "Select by row" "Select by column" "Select by multi-rows" "Cancel"
+    select selection in "Select all data in a table" "Select by row" "Select by column" "Select by multi-rows" "Select When Larger Than" "Select When Lower Than" "Cancel"
     do
         echo -e "${green} $selection ${clear}"
         case $selection in 
-            "Select all data in a table " )
-                source select_all_fun
+            "Select all data in a table" )
+               select_all_fun
             ;;
             "Select by row" )
                 select_by_row_fun
@@ -193,7 +194,7 @@ select_from_fun (){
                 echo "select by column"
             ;;
             "Cancel" )
-            echo "cancel"
+                echo "cancel"
         esac
     done
 }
