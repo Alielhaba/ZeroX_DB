@@ -29,7 +29,17 @@ rechoose_select_from_options () {
 	echo -e "${cyan}2) Select by row ${clear}"
     echo -e "${cyan}3) select by column ${clear}"
     echo -e "${cyan}4) Select by multi-rows ${clear}"
-    echo -e "${cyan}5) Cancel ${clear}"
+    echo -e "${cyan}5) Select When Larger Than ${clear}"
+    echo -e "${cyan}6) Select When Lower Than ${clear}"
+    echo -e "${cyan}7) Cancel ${clear}"
+}
+
+rechoose_select_by_row_options () {
+    echo -e "${magenta}Please re-choose from the following list${clear}"
+    echo -e "${cyan}1) Select by Primary Key ${clear}"
+	echo -e "${cyan}2) Select by row number ${clear}"
+    echo -e "${cyan}3) Select by a Specific Value${clear}"
+    echo -e "${cyan}4) Cancel ${clear}"
 }
 
 #--------------Function Select all Data in table ---------------------------------------------------------
@@ -54,6 +64,8 @@ select_all_fun () {
         fi
     done
 }
+
+
 #----------------------Function Select by row---------------------------------------------------------
 select_by_row_fun () {
     read -p "Enter the table name : " tbname
@@ -62,7 +74,7 @@ select_by_row_fun () {
     do
         if [[ -e $tbname ]];then
             echo -e "${yellow} Metadata of the table :${clear}"
-            sed -n '${yellow}1,3${clear}p' $tbname
+            echo -e "${blue}`sed -n '1,3p' $tbname`${clear}"
             select numrow in "Select by Primary Key" "Select by row number" "Select by a Specific Value" "Cancel"
             do 
                 echo -e "${bg_cyan}$numrow${clear}"
@@ -84,9 +96,10 @@ select_by_row_fun () {
                                     }
                                 } 
                                 END{}' $PWD/$tbname
+                                rechoose_select_by_row_options
                                 break
                             elif [[ $pkvalue = "exit" ]];then
-                                select_by_row_fun
+                                rechoose_select_by_row_options
                                 break
                             else 
                                 echo -e "${yellow}--------------------------------------------------------------------${clear}"
@@ -104,15 +117,16 @@ select_by_row_fun () {
                 "Select by row number" )
                 # Select By row number Function ----------------------------------
                     select_row_number () {
-                        read -p "Enter the number of row you want to view" rwnumber 
+                        read -p "Enter the number of row you want to view : " rwnumber 
                         echo -e "${bg_red} Hint: If you want to go back enter (exit)...${clear}"
                         case $rwnumber in 
-                        +[0-999] )
-                            sed -n '${rwnumber}p'$PWD/$tbname
+                        +([0-99]) )
+                            echo -e "${bg_yellow}The content of the row number you entered($rwnumber): ${clear}"
+                            cat $PWD/$tbname | sed -n ''$rwnumber'p'
+                            rechoose_select_by_row_options
                         ;;
                         "exit" )
-                            select_by_row_fun
-                            break
+                            rechoose_select_by_row_options
                         ;;
                         * )
                             echo -e "${yellow}--------------------------------------------------------------------${clear}"
@@ -136,26 +150,15 @@ select_by_row_fun () {
                         else
                             echo -e "${bg_yellow}The row that contain Value of $specvalue: ${clear}"
                             grep "$specvalue" $tbname
-                            #awk -v Y="$specvalue"'
-                            #BEGIN{FS=":"}
-                            # {   
-                            #    i=1;
-                            #    while(i <= NF){
-                            #        if ($i == Y){
-                            #            print $0
-                            #        }  
-                            #    }
-                            #    i++;                            
-                            #}
-                            #END{}' $PWD/$tbname
+                            rechoose_select_by_row_options
                         fi 
                     }
                     # Select By Specific Value Function ------------------------------------- Ended
                     select_by_spec_val
-                ;;
+                ;;  
                 "Cancel" )
-                rechoose_select_from_options
-                break
+                    select_from_fun
+                    break
                 esac
             done
         elif [[ $tbname == "exit" ]];then
@@ -170,10 +173,43 @@ select_by_row_fun () {
         fi
     done
 }
+#--------------------------------------------------------------------------------------------------------------------------------------------------------
+#---------------------------------------------------------Function Select by column---------------------------------------------------------
+select_by_col (){
+    read -p "Enter the table name : " coltbname
+    shopt -s extglob
+    while true
+    do
+        if [[ -e $coltbname ]];then
+            echo -e "${yellow} Metadata of the table :${clear}"
+            echo -e "${blue}`sed -n '1,3p' $coltbname`${clear}"
+            echo -e "${blue}`read -p "Enter column number : " colnumber`${clear}"
+            awk '
+                BEGIN{FS=":";i=0}
+                {
+                    while(i<1){
+                        print NF
+                        i++;
+                    }
+                }
+            END{}' $coltbname=x
+            
+            if [[ `$colnumber`` <= `$x`` -a "$colnumber" > 0 ]];then
+                cut -d : -f$colnumber $coltbname
+            else
+                echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                echo -e "${red} * Your entery is not Exist.${clear}"   
+                echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            fi
+        else 
+                echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                echo -e "${red} * Your entery is not Exist.${clear}"   
+                echo -e "${yellow}--------------------------------------------------------------------${clear}"
+        fi
+    done
+}   
 
-
-
-
+#--------------------------------------------------------------------------------------------------------------------------------------------------------
 #Select from Function
 select_from_fun (){
     echo -e "${bg_magenta}Hint : choose a number from the following list :${clear}"
@@ -188,7 +224,7 @@ select_from_fun (){
                 select_by_row_fun
             ;;
             "Select by column" )
-                echo "select by column"
+                select_by_col
             ;;
             "Select by multi-rows" )
                 echo "select by column"

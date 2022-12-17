@@ -1,0 +1,12 @@
+    #!/usr/bin/bash
+    awk '
+    BEGIN{FS=":"}
+    {
+        while(i<1){
+            print NF
+            i++;
+        }
+    }
+    END{}' test
+
+    awk 'BEGIN{FS=":"}{while(i<1){print NF; i++;}}END{}' test
