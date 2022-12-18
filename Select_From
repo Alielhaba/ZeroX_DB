@@ -50,7 +50,9 @@ select_all_fun () {
     do
         if [[ -e $tballname ]];then
             echo -e "${bg_yellow} ${tballname} Table Contents:${clear}"
-            cat ${tballname}
+            #cat ${tballname}
+            column -s ":" -t  ${tballname}
+            rechoose_select_from_options 
             break
         elif [[ $name = "exit" ]];then
             rechoose_select_from_options
@@ -178,36 +180,151 @@ select_by_row_fun () {
 select_by_col (){
     read -p "Enter the table name : " coltbname
     shopt -s extglob
-    while true
-    do
-        if [[ -e $coltbname ]];then
-            echo -e "${yellow} Metadata of the table :${clear}"
-            echo -e "${blue}`sed -n '1,3p' $coltbname`${clear}"
-            echo -e "${blue}`read -p "Enter column number : " colnumber`${clear}"
-            awk '
-                BEGIN{FS=":";i=0}
-                {
-                    while(i<1){
-                        print NF
-                        i++;
-                    }
-                }
-            END{}' $coltbname=x
-            
-            if [[ `$colnumber`` <= `$x`` -a "$colnumber" > 0 ]];then
-                cut -d : -f$colnumber $coltbname
-            else
-                echo -e "${yellow}--------------------------------------------------------------------${clear}"
-                echo -e "${red} * Your entery is not Exist.${clear}"   
-                echo -e "${yellow}--------------------------------------------------------------------${clear}"
-            fi
-        else 
-                echo -e "${yellow}--------------------------------------------------------------------${clear}"
-                echo -e "${red} * Your entery is not Exist.${clear}"   
-                echo -e "${yellow}--------------------------------------------------------------------${clear}"
-        fi
-    done
+    if [[ -e $coltbname ]];then
+        echo -e "${yellow} Metadata of the table :${clear}"
+        echo -e "${blue}`sed -n '1,3p' $coltbname`${clear}"
+        select_col_num (){ #-------------------------------------sub_function---------------------------------------------
+            select coloption in "select single-column" "cancel"
+            do
+                echo -e "${bg_cyan}$coloption${clear}" 
+                case $coloption in 
+                    "select single-column" )
+                        read -p "Enter column number : " colnumber
+                        check_col_constraints_fun (){ #-----------------------sub-function-------------------------------
+                            case $1 in 
+                                +([1-99999]) )
+                                    columns=$(awk 'BEGIN{FS=":"}{while(i<1){print NF; i++;}}END{}' $coltbname)
+                                    if [[ "$1" -le "$columns" ]];then
+                                        echo -e "${bg_yellow}The content of column ($colnumber) : ${clear}"
+                                        cut -d : -f$colnumber $coltbname
+                                        rechoose_select_from_options
+                                    else
+                                        echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                                        echo -e "${red} * Your entery is not Exist.${clear}"   
+                                        echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                                        select_col_num 
+                                    fi
+                                ;;
+                                [0] ) 
+                                    echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                                    echo -e "${red} * Your entery is should not be Zero.${clear}"   
+                                    echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                                    select_col_num 
+                                ;;
+                                "exit" )
+                                    select_from_fun
+                                ;;
+                                *)
+                                    echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                                    echo -e "${red} * Your entery is not number.${clear}"   
+                                    echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                                    select_col_num 
+                            esac
+                        }
+                        check_col_constraints_fun "$colnumber"
+                    ;;
+                    "cancel" )
+                        select_from_fun
+                        break
+                    ;;
+                    *)
+                        echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                        echo -e "${red} * Your entery is Wrong.${clear}"   
+                        echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                        select_col_num 
+                esac
+            done
+        }
+        select_col_num
+    else 
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            echo -e "${red} * Your entery table is not Exist.${clear}"   
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            select_from_fun
+    fi
 }   
+#--------------------------------------------------------------------------------------------------------------------------------------------------------
+#---------------------------------------------------------Function Select Multi Rows --------------------------------------------------------
+select_multi_rows (){
+    read -p "Enter the table name : " coltbname
+    shopt -s extglob
+    if [[ -e $coltbname ]];then
+        echo -e "${yellow} Metadata of the table :${clear}"
+        echo -e "${blue}`sed -n '1,3p' $coltbname`${clear}"
+        select multioption in "Select rows in range" "cancel"
+        do
+            echo -e "${bg_cyan}$multioption${clear}" 
+            case $multioption in 
+                "Select rows in range")
+                    read -p "Please enter start point(row number): " startpoint
+                    case $startpoint in     
+                        +([1-99999]) )
+                            read -p "please enter end point(row number): " endpoint
+                            case $endpoint in 
+                                +([1-99999]) )
+                                    if [[ "$startpoint" -lt "$endpoint" ]];then
+                                        echo -e "${BOLD}`awk -vx="$startpoint" -vy="$endpoint"  'NR>=x && NR<=y {print}' $coltbname`${clear}"
+                                        select_from_fun
+                                    else
+                                        echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                                        echo -e "${red} * End Point should not be smaller than Start Point.${clear}"   
+                                        echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                                        select_multi_rows
+                                    fi
+                                ;;
+                                "exit" )
+                                    select_multi_rows   
+                                ;;
+                                * )
+                                echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                                echo -e "${red} * Your entery is Wrong.${clear}"   
+                                echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                                select_multi_rows
+                            esac
+                        ;;
+                        [0] )
+                            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                            echo -e "${red} * Your entery is should not be Zero.${clear}"   
+                            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                            select_multi_rows
+                        ;;
+                        "exit" )
+                            break
+                            select_multi_rows 
+                        ;;
+                        *)
+                            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                            echo -e "${red} * Your entery is Wrong.${clear}"   
+                            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                            select_multi_rows
+                    esac
+                ;;
+                "cancel" )
+                    select_from_fun
+                    break
+                ;;
+                *)
+                    echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                    echo -e "${red} * Your entery is Wrong.${clear}"   
+                    echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                    select_multi_rows
+            esac
+        done
+    elif [[ $coltbname = "exit" ]];then
+        select_from_fun
+    else 
+        echo -e "${yellow}--------------------------------------------------------------------${clear}"
+        echo -e "${red} * Your entery table is not Exist.${clear}"   
+        echo -e "${yellow}--------------------------------------------------------------------${clear}"
+        select_multi_rows
+    fi
+}
+
+
+
+
+
+
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------
 #Select from Function
@@ -227,7 +344,7 @@ select_from_fun (){
                 select_by_col
             ;;
             "Select by multi-rows" )
-                echo "select by column"
+                select_multi_rows
             ;;
             "Cancel" )
                 echo "cancel"
