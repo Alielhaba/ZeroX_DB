@@ -1,0 +1,136 @@
+#!/user/bin/bash
+
+#change color to blue before printing
+# Color variables
+BOLD="\033[1m"
+red='\033[0;31m'
+green='\033[0;32m'
+yellow='\033[0;33m'
+blue='\033[0;34m'
+magenta='\033[0;35m'
+cyan='\033[0;36m'
+# Clear the color after that
+clear='\033[0m'
+# Background Color variables
+bg_red='\033[0;41m'
+bg_green='\033[0;42m'
+bg_yellow='\033[0;43m'
+bg_blue='\033[0;44m'
+bg_magenta='\033[0;45m'
+bg_cyan='\033[0;46m'
+#------------------------------------------------------------------------------------------------
+#Insert_Function 
+#------------------------------------------------------------------------------------------------
+
+Insert_Func ()
+{
+    echo -e "${red}\t\t\t  ---------------------------------------- ${clear}" 
+    echo -e "${red}\t\t\t  -----------Insert Into Table ----------- ${clear}"
+    echo -e "${red}\t\t\t  ----------------------------------------\n\n\n ${clear}" 
+
+    if [[  $1 == "" ]];
+    then 
+
+        echo -e "${red}[ Error ] --- Can't Read Value You Entered --- ${clear}"
+        Back_To_Menu
+
+    elif [[ `ls | grep -i "^$1.d$"` == "" && `ls | grep -i "^$1.m$"` == ""  ]]; then
+        
+        echo -e "${red}[ Error ] --- Table Name Not Exist --- ${clear}" 
+        Back_To_Menu  
+
+    else 
+        Insert_Values_Func $1
+
+    fi
+}
+
+#------------------------------------------------------------------------------------------------
+#Return_To_Menu_Fun
+#-----------------------------------------------------------------------------------------------
+
+Back_To_Menu ()
+{
+    echo -e "${green} ---------------------------------------- ${clear}" 
+    echo -e "${green} ----------- * Select Menu * ------------ ${clear}"
+    echo -e "${green} ---------------------------------------- ${clear}" 
+
+        select Menu in  "Insert Table Name Again" "Back To (Main_Menu)" "Exit"
+        do
+            case $Menu in
+                "Insert Table Name Again")
+                    Insert_Func
+                    break
+                    ;;
+                "BBack To (Main_Menu)")
+                    echo  "BBack To (Main_Menu)"
+                    ZeroXDBMS.sh
+                    break
+                    ;;
+                "Exit")
+                    echo  "Exit"
+                    break
+                    ;;
+                    *)
+                    echo -e "${red}[ Error ] --- Enter Valid Number Please --- ${clear}" 
+                    Back_To_Menu
+                    ;;
+            esac
+        done
+}
+
+#------------------------------------------------------------------------------------------------
+#Insert_Values_Func
+#-----------------------------------------------------------------------------------------------
+
+Insert_Values_Func ()
+{
+echo -e "${green}---------------------------------------- Cloumn Name ------------------------------------${clear}"
+
+for j in `awk -F " " '{print $1}' "$1.m"` 
+do 
+    arr_column+=("$j")
+done
+for j in `awk -F " " '{print $2}' "$1.m"` 
+do 
+    arr_Type+=("$j")
+done
+
+column -t -s " " -o " --> " "$1.m"
+echo -e "${green}-----------------------------------------------------------------------------------------${clear}"
+
+for i in "${!arr_column[@]}" 
+do
+    read -p "Enter Value of ${arr_column[i]} " Value
+
+    if [[ i == 0 ]];then
+        while ! [[ `cut -d ":" -f1 "$1" | grep "$value"` == "" ]];
+        do
+            read -p "[ Error ] --- Primary Key Should be uniqe --- " Value
+        done
+    fi
+    if [[ "${arr_Type[i]}" == "int" ]]; then
+        while ! [[ $Value =~ ^[0-9]*$  ]];
+        do
+            read -p "[ Error ] --- Enter Valid Input --- " Value
+        done
+    elif [[ "${arr_Type[i]}" == "var" ]];then
+        while ! [[ $Value =~ ^[a-zA-Z]*$ ]];
+        do
+            read -p "[ Error ] --- Enter Valid Input --- " Value
+        done
+    fi
+
+    if [[ $i == "${#arr_column[@]}" ]];then
+        line=$line$Value"\n"
+    else
+        line=$line$Value":"
+    fi
+done
+echo -e $line"\n" >> "$1.b"
+}
+
+
+
+read -p "Enter Table Name : " Table_Name
+Insert_Func $Table_Name
