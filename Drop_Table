@@ -1,0 +1,80 @@
+#!/user/bin/bash
+#change color to blue before printing
+# Color variables
+BOLD="\033[1m"
+red='\033[0;31m'
+green='\033[0;32m'
+yellow='\033[0;33m'
+blue='\033[0;34m'
+magenta='\033[0;35m'
+cyan='\033[0;36m'
+# Clear the color after that
+clear='\033[0m'
+# Background Color variables
+bg_red='\033[0;41m'
+bg_green='\033[0;42m'
+bg_yellow='\033[0;43m'
+bg_blue='\033[0;44m'
+bg_magenta='\033[0;45m'
+bg_cyan='\033[0;46m'
+
+#------------------------------------------------------------------------------------------------
+#Drop_Function 
+#------------------------------------------------------------------------------------------------
+
+Drop_Table_Func()
+{
+    if [[  $1 == "" ]]; then 
+
+        echo -e "${red}[ Error ] --- Can't Read Value You Entered --- ${clear}"
+        Back_To_Menu
+
+    elif [[ `ls | grep -i "^$1.d$"` == "" && `ls | grep -i "^$1.m$"` == ""  ]];then
+        
+        echo -e "${red}\n[ Error ] --- Table Name Not Exist --- ${clear}" 
+        Back_To_Menu  
+
+    else 
+        echo -e "${green}----------------------------------- * Drop Table * ------------------------------ \n${clear}"
+
+        rm "$1.d"
+        rm "$1.m"
+
+        echo -e "${green} -- Table Droped Successfully -- \n${clear}"
+    fi
+}
+
+#------------------------------------------------------------------------------------------------
+#Back_To_Menu_Function 
+#------------------------------------------------------------------------------------------------
+
+Back_To_Menu ()
+{
+        echo -e "${green}-------------------------------------- * Select Menu * ------------------------------------${clear}"
+
+        select Menu in  "Insert Table Name Again" "Exit"
+        do
+            case $Menu in
+                "Insert Table Name Again")
+                    read -p "Enter Table Name : " D_Table
+                    Drop_Table_Func $D_Table 
+                    break
+                    ;;
+                "Exit")
+                    echo  "Exit"
+                    break
+                    ;;
+                    *)
+                    echo -e "${red}[ Error ] --- Enter Valid Number Please --- ${clear}" 
+                    Back_To_Menu
+                    ;;
+            esac
+        done
+}
+
+#------------------------------------------------------------------------------------------------
+#Calling
+#------------------------------------------------------------------------------------------------
+
+read -p "Enter Table Name : " D_Table
+Drop_Table_Func $D_Table
