@@ -98,7 +98,7 @@ Insert_Values_Func ()
     do
         if [[ $i = 0 ]];then
 
-            val=$(($(wc -l $1.b | cut -d " " -f1 ) +1 ))
+            val=$(($(wc -l $1.d | cut -d " " -f1 ) +1 ))
             line=$line$val":"
 
         else
@@ -122,10 +122,12 @@ Insert_Values_Func ()
             fi
         fi  
     done
-echo -e $line >> "$1.b"
+echo -e $line >> "$1.d"
 }
 
-
+#------------------------------------------------------------------------------------------------
+#Calling
+#------------------------------------------------------------------------------------------------
 
 read -p "Enter Table Name : " Table_Name
 Insert_Func $Table_Name

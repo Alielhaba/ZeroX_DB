@@ -37,19 +37,19 @@ Connect_DB_Func () {
                     "create table" )
                         source Create_Table 
                         ;;
-                    "drop table" ) 
-                        echo "Drop table"  
+                    "Drop table" ) 
+                        source Drop_Table 
                         ;;	
-                    "insert into table" )
-                        echo "Insert table" 
+                    "Insert Into Table" )
+                        source Insert_Table
                         ;;
-                    "select from table" )  
+                    "Select From Table" )  
                         source Select_From 
                         ;;		
-                    "delete from table" )
+                    "Delete From Table" )
                         echo "Delete From table" 
                         ;; 
-                    "update table" ) 
+                    "Update Table" ) 
                         echo "Update table"  
                         ;;	
                     "Exit" ) 
