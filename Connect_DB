@@ -40,16 +40,16 @@ Connect_DB_Func () {
                     "Drop table" ) 
                         source Drop_Table 
                         ;;	
-                    "Insert Into Table" )
+                    "insert into table" )
                         source Insert_Table
                         ;;
-                    "Select From Table" )  
+                    "select from table" )  
                         source Select_From 
                         ;;		
-                    "Delete From Table" )
-                        echo "Delete From table" 
+                    "delete from Table" )
+                        echo "delete From table" 
                         ;; 
-                    "Update Table" ) 
+                    "update table" ) 
                         echo "Update table"  
                         ;;	
                     "Exit" ) 
