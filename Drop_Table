@@ -21,6 +21,28 @@ bg_cyan='\033[0;46m'
 #------------------------------------------------------------------------------------------------
 #Drop_Function 
 #------------------------------------------------------------------------------------------------
+Check_Before_Drop_Table()
+{
+    shopt -s extglob 
+    echo -e "${red} Are You Sure You Want To Drop {$1} Table (y/n) :${clear}"
+    read 
+    case $REPLY in 
+        [yY] ) 
+            rm "$1.data"
+            rm "$1.meta"
+           echo -e "${green} -- Table Droped Successfully -- \n${clear}"
+        ;;
+        [Nn] )
+            echo -e "${yellow}*Droped Step Canceled ${clear}"
+        ;;
+        * )
+            echo -e "${red}*Wrong Entery${clear}"
+            
+    esac
+}
+#------------------------------------------------------------------------------------------------
+#Drop_Function 
+#------------------------------------------------------------------------------------------------
 
 Drop_Table_Func()
 {
@@ -29,7 +51,7 @@ Drop_Table_Func()
         echo -e "${red}[ Error ] --- Can't Read Value You Entered --- ${clear}"
         Back_To_Menu
 
-    elif [[ `ls | grep -i "^$1.d$"` == "" && `ls | grep -i "^$1.m$"` == ""  ]];then
+    elif [[ `ls | grep -i "^$1.data$"` == "" && `ls | grep -i "^$1.meta$"` == ""  ]];then
         
         echo -e "${red}\n[ Error ] --- Table Name Not Exist --- ${clear}" 
         Back_To_Menu  
@@ -37,10 +59,8 @@ Drop_Table_Func()
     else 
         echo -e "${green}----------------------------------- * Drop Table * ------------------------------ \n${clear}"
 
-        rm "$1.d"
-        rm "$1.m"
+        Check_Before_Drop_Table $1
 
-        echo -e "${green} -- Table Droped Successfully -- \n${clear}"
     fi
 }
 
@@ -78,3 +98,5 @@ Back_To_Menu ()
 
 read -p "Enter Table Name : " D_Table
 Drop_Table_Func $D_Table
+
+
