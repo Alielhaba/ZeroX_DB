@@ -45,17 +45,16 @@ standard
 term
 comment
 
-
+<<comment
 {
-
 for ((i=0 ; i<=100 ; i+=5));
 do 
     sleep 0.1
     echo $i
 
 done
-
-} | whiptail  --gauge "Loading ZeroXDBMS-Script !" 6 60 0
+} | whiptail  --gauge "Loading ZeroXDBMS-Script !" 3 30 0
+comment
 
 echo "                                                                                                                       "
 echo -e "${blue}--------------------------------------------------------------------------------------------------------------------------------------${clear}"

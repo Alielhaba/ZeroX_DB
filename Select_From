@@ -1,6 +1,5 @@
 #!/usr/bin/bash
 # --------------------------------------------------------------------------------------------------------------
-#change color to blue before printing
 # Color variables
 BOLD="\033[1m"
 red='\033[0;31m'
@@ -39,6 +38,18 @@ rechoose_select_by_row_options () {
     echo -e "${cyan}3) Select by a Specific Value${clear}"
     echo -e "${cyan}4) Cancel ${clear}"
 }
+select_from_connect_options () {
+    echo -e "${magenta}Please re-choose from the following list${clear}"
+    echo -e "${cyan}1) list table ${clear}"
+	echo -e "${cyan}2) create table ${clear}"
+    echo -e "${cyan}3) drop table ${clear}"
+    echo -e "${cyan}4) insert into table ${clear}"
+    echo -e "${cyan}5) select from table${clear}"
+    echo -e "${cyan}6) delete from table ${clear}"
+    echo -e "${cyan}7) update table ${clear}"
+    echo -e "${cyan}8) Exit ${clear}"
+}
+
 
 #--------------Function Select all Data in table ---------------------------------------------------------
 select_all_fun () {
@@ -264,7 +275,7 @@ select_in_range (){
             case $endpoint in 
                 +([1-99999]) )
                     if [[ "$startpoint" -lt "$endpoint" ]];then
-                        echo -e "${BOLD}`awk -vx="$startpoint" -vy="$endpoint"  'NR>=x && NR<=y {print}' $coltbname`${clear}"
+                        echo -e "${BOLD}`awk -vx="$startpoint" -vy="$endpoint"  'NR>=x && NR<=y {print}' $1`${clear}"
                         select_from_fun
                     else
                         echo -e "${yellow}--------------------------------------------------------------------${clear}"
@@ -302,7 +313,7 @@ select_in_range (){
 }
 #------------------------------------Main Function Select by Multi-rows ------------------------------------------------#
 select_multi_rows (){
-    read -p "Enter the table name : " coltbname
+    read -p "Enter the table name : " multitbname
     shopt -s extglob
     if [[ -e $coltbname ]];then
         echo -e "${yellow} Metadata of the table :${clear}"
@@ -312,7 +323,7 @@ select_multi_rows (){
             echo -e "${bg_cyan}$multioption${clear}" 
             case $multioption in 
                 "Select rows in range" )
-                    select_in_range
+                    select_in_range "$multitbname"
                 ;;
                 "cancel" )
                     select_from_fun
@@ -325,7 +336,7 @@ select_multi_rows (){
                     select_multi_rows
             esac
         done
-    elif [[ $coltbname = "exit" ]];then
+    elif [[ $multitbname = "exit" ]];then
         select_from_fun
     else 
         echo -e "${yellow}--------------------------------------------------------------------${clear}"
@@ -356,7 +367,12 @@ select_from_fun (){
                 select_multi_rows
             ;;
             "Cancel" )
-                echo "cancel"
+                select_from_connect_options 
+                break
+            ;;
+            *)
+                echo -e "${red}*Wrong Entery${clear}"
+                select_from_fun
         esac
     done
 }

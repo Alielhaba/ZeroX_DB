@@ -46,8 +46,8 @@ Connect_DB_Func () {
                     "select from table" )  
                         source Select_From 
                         ;;		
-                    "delete from Table" )
-                        echo "delete From table" 
+                    "delete from table" )
+                        source Delete_From_Table.sh 
                         ;; 
                     "update table" ) 
                         echo "Update table"  
