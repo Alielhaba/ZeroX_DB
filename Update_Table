@@ -18,14 +18,16 @@ bg_yellow='\033[0;43m'
 bg_blue='\033[0;44m'
 bg_magenta='\033[0;45m'
 bg_cyan='\033[0;46m'
+
+declare arr_Type
+declare arr_column
 #------------------------------------------------------------------------------------------------
 #Insert_Function 
 #------------------------------------------------------------------------------------------------
-
-Insert_Func ()
+Update_Func ()
 {
      
-    if [[  $1 == "" ]]; then 
+    if [[  $1 == \0 ]]; then 
 
         echo -e "${red}[ Error ] --- Can't Read Value You Entered --- ${clear}"
         Back_To_Menu
@@ -36,17 +38,16 @@ Insert_Func ()
         Back_To_Menu  
 
     else 
-        echo -e "${green}*----------------------------------- * Insert Into Table * ------------------------------* \n${clear}"
+        echo -e "${green}*------------------------------------- * Update Table * --------------------------------* \n${clear}"
 
-        Insert_Values_Func $1
+        Update_Values_Func $1
 
     fi
 }
 
 #------------------------------------------------------------------------------------------------
-#Return_To_Menu_Fun
-#-----------------------------------------------------------------------------------------------
-
+#Back_To_Menu_Function 
+#------------------------------------------------------------------------------------------------
 Back_To_Menu ()
 {
         echo -e "${green}*-------------------------------------- * Select Menu * ------------------------------------*${clear}"
@@ -56,7 +57,7 @@ Back_To_Menu ()
             case $Menu in
                 "Insert Table Name Again")
                     read -p "Enter Table Name : " Table_Name
-                    Insert_Func $Table_Name 
+                    Update_Func $Table_Name 
                     break
                     ;;
                 "Exit")
@@ -74,10 +75,61 @@ Back_To_Menu ()
 }
 
 #------------------------------------------------------------------------------------------------
-#Insert_Values_Func
+#Update_Menu_Function 
+#------------------------------------------------------------------------------------------------
+Update_Menu ()
+{
+    echo -e "${green}*-------------------------------------- * Update Menu * ------------------------------------*${clear}"
+
+    select item in "Update Full User Data" "Update Specific Value" "Exit"
+        do
+            case $item in 
+                "Update Full User Data")
+                    Update_Full_Data_Func
+                    ;;
+                "Update Specific Value")
+                    echo "Update Specific Value"
+                    ;;
+                "Exit")
+                    echo " Exit"
+                    break
+                    ;;
+                *)
+                echo -e "${red}[ Error ] --- Enter Valid Number Please --- ${clear}" 
+                Update_Menu
+            esac
+        done
+
+        
+}
+
+#------------------------------------------------------------------------------------------------
+#Update_Values_Func
 #-----------------------------------------------------------------------------------------------
 
-Insert_Values_Func ()
+Update_Full_Data_Func ()
+{
+    read -p "Insert your ${arr_column[0]} " PK
+    sed 
+
+    for ((i=1;i<${#arr_column[@]};i++));
+    do
+        coll=${arr_column[$i]}
+        echo $coll
+        read -p "Insert New Value Of $coll "
+        new_val_arr+=("$i")
+
+    done
+    echo "${new_val_arr[@]}"
+
+
+}
+
+#------------------------------------------------------------------------------------------------
+#Update_Values_Func
+#-----------------------------------------------------------------------------------------------
+
+Update_Values_Func ()
 {
     declare val
     declare line
@@ -94,44 +146,14 @@ Insert_Values_Func ()
 
     column -t -s " " -o " --> " "$1.meta"
     echo -e "${green}*-----------------------------------------------------------------------------------------*${clear}"
+    #calling Function to select what type of update
+    Update_Menu
 
-   
-    for i in "${!arr_column[@]}" 
-    do
-        if [[ $i = 0 ]];then
-
-            val=$(($(wc -l $1.d | cut -d " " -f1 ) +1 ))
-            line=$line$val":"
-
-        else
-            read -p "$i- Enter Value of ${arr_column[i]} : " Value
-            if [[ "${arr_Type[i]}" == "int" ]]; then
-                while ! [[ $Value =~ ^[0-9]*$  ]];
-                do
-                    read -p "[ Error ] --- Enter Valid Input --- " Value
-                done
-            elif [[ "${arr_Type[i]}" == "var" ]];then
-                while ! [[ $Value =~ ^[a-zA-Z]*$ ]];
-                do
-                    read -p "[ Error ] --- Enter Valid Input --- " Value
-                done
-            fi
-
-            if ! [[ $i == "${!arr_column[@]}" ]];then
-                line=$line$Value":"
-                else
-                line=$line$Value
-            fi
-        fi  
-    done
-
-    echo -e $line >> "$1.d"
 
 }
 
-#------------------------------------------------------------------------------------------------
-#Calling
-#------------------------------------------------------------------------------------------------
 
-read -p "Enter Table Name : " Table_Name
-Insert_Func $Table_Name
+
+
+read -p "Insert Table Name: " Name 
+Update_Func $Name
