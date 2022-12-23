@@ -45,6 +45,15 @@ rechoose_delete_byrow_options () {
     echo -e "${cyan}3) Delete rows in range ${clear}"
     echo -e "${cyan}4) Cancel ${clear}"
 }
+
+rechoose_delete_bycol_options () {
+    echo -e "${bg_magenta}Please re-choose number from the following list${clear}"
+    echo -e "${cyan}1) Delete single column ${clear}"
+    echo -e "${cyan}2) Cancel ${clear}"
+}
+
+
+
 # --------------------------------------------------SUB-FUNCTIONS--------------------------------------------------------#
 
 #-------------------------------Checking Before Deleting--------------------------
@@ -258,6 +267,8 @@ delete_in_range (){
     esac
 }
 
+
+
 # ----------MAIN FUNCTION:DELETE A ROW INSIDE THE TABLE-------#
 delete_by_row_fun () {
     read -p "Enter the table name : " tbname
@@ -302,6 +313,102 @@ delete_by_row_fun () {
         fi
     done
 }
+# ----------MAIN FUNCTION:DELETE A ROW INSIDE THE TABLE-------# ---------ENDED
+#--------------------------------------------------------------------------------------#
+# (1/3)----------SUB FUNCTION :CHECKING USING ROW IN RANGE------#
+check_before_delete_col (){
+    shopt -s extglob 
+    echo -e "${red} Are you Sure you want to delete this content (y/n) :${clear}"
+    read 
+    case $REPLY in 
+        +([Yy|Yes|YES|yEs|YeS|yES|yeS]) ) 
+            # awk -vX="$1" -i inplace '{$0=gensub(/\s*\S+$/,"",X)}1' $2
+            awk -vX="$1" -F : -i inplace '{$0=gensub(/\s*\S+/,"",X)}1' $2
+            #awk -vX="$1" '!("$"X="")' $2
+            ####################################awk -vX="$1" -i inplace 'BEGIN{FS=":"}{if('$'X!=""){print ''}}END{}' $2  
+            # sed -i 's/*/""/g' $2  
+            # #cut -d : -f"$1" $2 |
+            echo -e "${bg_yellow}*Deleting Succesfully Done ${clear}" 
+            rechoose_delete_bycol_options
+        ;;
+        +([Nn|No|NO|nO]) )
+            echo -e "${yellow}*Deleting Step Canceled ${clear}"
+            check_before_delete_col
+        ;;
+        * )
+            echo -e "${red}*Wrong Entery${clear}"
+            check_before_delete_row_inrange
+    esac
+}
+# (2/3) ----------SUB FUNCTION :CHEHCK.COL.CONSTRAINTS---------#
+check_col_constraints_fun (){
+    case $1 in 
+        +([1-99999]) )
+            columns=$(awk 'BEGIN{FS=":"}{while(i<1){print NF; i++;}}END{}' $2)
+            if [[ "$1" -le "$columns" ]];then
+                echo -e "${bg_yellow}The content of column ($1) : ${clear}"
+                cut -d : -f$1 $2
+                check_before_delete_col "$1" "$2"
+            else
+                echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                echo -e "${red} * Your entery is not Exist.${clear}"   
+                echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                delete_a_col
+            fi
+        ;;
+        [0] ) 
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            echo -e "${red} * Your entery is should not be Zero.${clear}"   
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            delete_a_col
+        ;;
+            "delete column data" )
+                echo "delete a column data"
+            ;;
+        *)
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            echo -e "${red} * Your entery is not number.${clear}"   
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+        esac
+    done
+}
+#--(3/3) ----------SELECT-COL-NUM ---------#
+select_col_num (){ 
+    select coloption in "select single-column" "cancel"
+    do
+        echo -e "${bg_cyan}$coloption${clear}" 
+        case $coloption in 
+            "select single-column" )
+                read -p "Enter column number : " colnumber
+                check_col_constraints_fun "$colnumber"
+            ;;
+            "cancel" )
+                select_from_fun
+                break
+            ;;
+            *)
+                echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                echo -e "${red} * Your entery is Wrong.${clear}"   
+                echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                select_col_num 
+        esac
+    done
+}
+#------------------MAIN FUNCTION : DELETE COLUMN ---------#
+delete_a_col (){
+    read -p "Enter the table name : " coltbname
+    shopt -s extglob
+    if [[ -e $coltbname ]];then
+        echo -e "${yellow} Metadata of the table :${clear}"
+        echo -e "${blue}`sed -n '1,3p' $coltbname`${clear}"
+        select_col_num "$coltbname"
+    else 
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            echo -e "${red} * Your entery table is not Exist.${clear}"   
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            select_from_fun
+    fi
+}   
 #-------------------------------------------DELETE_FROM------------------------------------------------------------#
 delete_from_fun (){
     echo -e "${bg_red}Hint : choose a number from the following list :${clear}"
@@ -319,8 +426,8 @@ delete_from_fun (){
                 echo "delete a specific value"
             ;;
             "delete column data" )
-                echo "delete a column data"
-            ;;
+                delete_a_col
+            ;;   
             "Cancel" )  
                 select_from_connect_options
                 break
