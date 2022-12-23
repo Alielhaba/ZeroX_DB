@@ -315,19 +315,62 @@ delete_by_row_fun () {
 }
 # ----------MAIN FUNCTION:DELETE A ROW INSIDE THE TABLE-------# ---------ENDED
 #--------------------------------------------------------------------------------------#
+# (1/1)----------SUB FUNCTION :SELECTION OF SPEC--VALUE ------#
+select_spec_value(){
+    read -p "Enter the value to be deleted : " specvalue
+    if [[ `grep "$specvalue" $1` != \0 ]];then
+        echo -e "${yellow}Rows That Contains Selected Value : ${clear}"
+        echo -e "${magenta}`grep "$specvalue" $1`${clear}"
+        read -p "Enter Primary Key Value  : " specpkvalue
+        if [[ `cut -d : -f1 $1 | grep "$specpkvalue"` -ne \0  ]];then
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            echo -e "${red} * Your entery is not Exist.${clear}"   
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            delete_by_spec_val
+        else
+            echo -e "${bg_yellow}The row that contain Value of $specvalue: ${clear}"
+            #awk 'BEGIN{FS=":",VAL=$specvalue}{if($1==VAL){'
+            rechoose_delete_from_options
+        fi
+    else 
+        echo -e "${yellow}--------------------------------------------------------------------${clear}"
+        echo -e "${red} * Your entery is not Exist.${clear}"   
+        echo -e "${yellow}--------------------------------------------------------------------${clear}"
+        select_spec_value
+    fi
+}
+#------------------MAIN FUNCTION : DELETE A SPECIFIC VALUE ---------#
+delete_by_spec_val () {
+    echo -e "${bg_red} Hint: If you want to go back enter (exit)..${clear}"
+    read -p "Enter the table name : " spectbname
+    shopt -s extglob
+    if [[ -e $spectbname ]];then
+        echo -e "${yellow} Metadata of the table :${clear}"
+        echo -e "${blue}`sed -n '1,3p' $spectbname`${clear}"
+        select_spec_value "$spectbname"
+    elif [[ $spectbname = "exit" ]];then
+        delete_from_fun
+    else
+        echo -e "${yellow}--------------------------------------------------------------------${clear}"
+        echo -e "${red} * Your entery table is not Exist.${clear}"   
+        echo -e "${yellow}--------------------------------------------------------------------${clear}"
+        delete_by_spec_val
+    fi
+}
+# ----------MAIN FUNCTION:DELETE A SPECIFIC VALUE-------# ---------ENDED
+#--------------------------------------------------------------------------------------#
 # (1/3)----------SUB FUNCTION :CHECKING USING ROW IN RANGE------#
 check_before_delete_col (){
     shopt -s extglob 
     echo -e "${red} Are you Sure you want to delete this content (y/n) :${clear}"
-    read 
+    read    
     case $REPLY in 
-        +([Yy|Yes|YES|yEs|YeS|yES|yeS]) ) 
-            # awk -vX="$1" -i inplace '{$0=gensub(/\s*\S+$/,"",X)}1' $2
-            awk -vX="$1" -F : -i inplace '{$0=gensub(/\s*\S+/,"",X)}1' $2
-            #awk -vX="$1" '!("$"X="")' $2
-            ####################################awk -vX="$1" -i inplace 'BEGIN{FS=":"}{if('$'X!=""){print ''}}END{}' $2  
-            # sed -i 's/*/""/g' $2  
-            # #cut -d : -f"$1" $2 |
+        +([Yy|Yes|YES|yEs|YeS|yES|yeS]) )
+            echo -e "${yellow}-------------------${clear}" 
+            awk -F : -vNU="$1" -i inplace '!/{print "$"NU}/' $2
+            #awk -vX="$1" -i inplace 'BEGIN{FS=":"}{if('$'X!=""){print ''}}END{}' $2
+            #cut -d : -f$1 $2 | sed -eir 's/+//g' 
+            # awk -vX="$1" -F ":" -i inplace '{$0=gensub(/\s*\S+/,"",X)}1' $2
             echo -e "${bg_yellow}*Deleting Succesfully Done ${clear}" 
             rechoose_delete_bycol_options
         ;;
@@ -347,7 +390,7 @@ check_col_constraints_fun (){
             columns=$(awk 'BEGIN{FS=":"}{while(i<1){print NF; i++;}}END{}' $2)
             if [[ "$1" -le "$columns" ]];then
                 echo -e "${bg_yellow}The content of column ($1) : ${clear}"
-                cut -d : -f$1 $2
+                cut -d : -f$1 $2  
                 check_before_delete_col "$1" "$2"
             else
                 echo -e "${yellow}--------------------------------------------------------------------${clear}"
@@ -362,15 +405,12 @@ check_col_constraints_fun (){
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
             delete_a_col
         ;;
-            "delete column data" )
-                echo "delete a column data"
-            ;;
         *)
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
             echo -e "${red} * Your entery is not number.${clear}"   
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            rechoose_delete_bycol_options
         esac
-    done
 }
 #--(3/3) ----------SELECT-COL-NUM ---------#
 select_col_num (){ 
@@ -380,10 +420,10 @@ select_col_num (){
         case $coloption in 
             "select single-column" )
                 read -p "Enter column number : " colnumber
-                check_col_constraints_fun "$colnumber"
+                check_col_constraints_fun "$colnumber" "$1"
             ;;
             "cancel" )
-                select_from_fun
+                rechoose_delete_from_options
                 break
             ;;
             *)
@@ -396,17 +436,20 @@ select_col_num (){
 }
 #------------------MAIN FUNCTION : DELETE COLUMN ---------#
 delete_a_col (){
+    echo -e "${bg_red} Hint: If you want to go back enter (exit)..${clear}"
     read -p "Enter the table name : " coltbname
     shopt -s extglob
     if [[ -e $coltbname ]];then
         echo -e "${yellow} Metadata of the table :${clear}"
-        echo -e "${blue}`sed -n '1,3p' $coltbname`${clear}"
+        echo -e "${blue}`sed -n '1,$d p' $coltbname`${clear}"
         select_col_num "$coltbname"
-    else 
-            echo -e "${yellow}--------------------------------------------------------------------${clear}"
-            echo -e "${red} * Your entery table is not Exist.${clear}"   
-            echo -e "${yellow}--------------------------------------------------------------------${clear}"
-            select_from_fun
+    elif [[ $coltbname = "exit" ]];then
+        delete_from_fun
+    else
+        echo -e "${yellow}--------------------------------------------------------------------${clear}"
+        echo -e "${red} * Your entery table is not Exist.${clear}"   
+        echo -e "${yellow}--------------------------------------------------------------------${clear}"
+        delete_a_col
     fi
 }   
 #-------------------------------------------DELETE_FROM------------------------------------------------------------#
@@ -423,7 +466,7 @@ delete_from_fun (){
                 delete_by_row_fun
             ;;
             "delete specific value" )
-                echo "delete a specific value"
+                delete_by_spec_val
             ;;
             "delete column data" )
                 delete_a_col
@@ -435,3 +478,16 @@ delete_from_fun (){
     done
 }
 delete_from_fun
+
+
+
+# awk -vX="$1" -F : '{print $"X"}' $2
+#awk -F : -vNU="$1" -i inplace '!/{print "$"NU}/' $2
+# cut -d : -f$1 $2 | sed -i -r 's/\S+//3' 
+#awk -v NU="$1" -F : -i inplace '{$0=gensub(/\s*\S+/,"",NU)}1' file
+# awk -vX="$1" -i inplace '{$0=gensub(/\s*\S+$/,"",X)}1' $2
+# awk -vX="$1" -F : -i inplace '{$0=gensub(/\s*\S+/,"",X)}1' $2
+#awk -vX="$1" '!("$"X="")' $2
+####################################awk -vX="$1" -i inplace 'BEGIN{FS=":"}{if('$'X!=""){print ''}}END{}' $2  
+# sed -i 's/*/""/g' $2  
+# #cut -d : -f"$1" $2 |
