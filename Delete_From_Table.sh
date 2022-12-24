@@ -34,8 +34,7 @@ rechoose_delete_from_options () {
     echo -e "${cyan}1) delete all data ${clear}"
 	echo -e "${cyan}2) delete a row${clear}"
     echo -e "${cyan}3) delete specific value ${clear}"
-    echo -e "${cyan}4) delete column data ${clear}"
-    echo -e "${cyan}5) Cancel ${clear}"
+    echo -e "${cyan}4) Cancel ${clear}"
 }
 
 rechoose_delete_byrow_options () {
@@ -85,13 +84,17 @@ delete_all_fun (){
     shopt -s extglob
     while true
     do
-        if [[ -e $tballname && `cat $tballname` != "" ]];then
+        if [[  -e "$tballname.meta" && -e "$tballname.data"  && `cat "$tballname.data"` != "" ]];then
             echo -e "${bg_yellow} ${tballname} Table Contents:${clear}"
-            #cat ${tballname}
-            column -s ":" -t  ${tballname}
-            check_before_delete_all "$tballname"
+            echo -e "${yellow}------------------------------------${clear}"
+            echo -e "${bg_blue}Table Metadata: ${clear}"
+            echo -e "${blue}`awk '{ gsub(" "," ---> "); }1' "$tballname.meta"`${clear}"
+            echo -e "${yellow}------------------------------------${clear}"
+            echo -e "${bg_blue}Table Data:${clear}"
+            column -t -s ":" "$tballname.data"
+            check_before_delete_all "$tballname.data"
             break
-        elif [[ -e $tballname && `cat $tballname` == "" ]];then   
+        elif [[ -e "$tballname.meta" && -e "$tballname.data"  && `cat $tballname` == "" ]];then   
             echo -e "${bg_red}**Your table is EMPTY**${clear}"
             rechoose_delete_from_options
             break
@@ -138,9 +141,9 @@ delete_by_pk () {
     read -p "Enter Primary Key Value : " pkvalue
     while true
     do
-        if [[ `cut -d : -f1 $tbname | grep "$pkvalue"` -ne \0 ]];then
+        if [[ `cut -d : -f1 $1 | grep "$pkvalue"` -ne \0 ]];then
             echo -e "${bg_yellow}The row of $pkvalue Primary Key Value: ${clear}"
-            awk -v X="$pkvalue" 'BEGIN{FS=":"}{if ($1==X){print NR,$0}} END{}' $PWD/$tbname
+            awk -v X="$pkvalue" 'BEGIN{FS=":"}{if ($1==X){print $0}} END{}' $1
             check_before_delete_pk "$1" "$pkvalue"
             break
         elif [[ $pkvalue = "exit" ]];then
@@ -164,7 +167,7 @@ check_before_delete_row_number(){
     read 
     case $REPLY in 
         +([Yy|Yes|YES|yEs|YeS|yES|yeS]) ) 
-            sed -i ''$2'd' $PWD/$1
+            sed -i ''$2'd' $1
             echo -e "${bg_yellow}*Deleting Succesfully Done ${clear}" 
             rechoose_delete_byrow_options
         ;;
@@ -185,9 +188,16 @@ delete_row_number () {
     echo -e "${bg_red} Hint: If you want to go back enter (exit)...${clear}"
     case $rwnumber in 
     +([0-99]) )
-        echo -e "${bg_yellow}The content of the row number you entered($rwnumber): ${clear}"
-        cat $PWD/$tbname | sed -n ''$rwnumber'p'
-        check_before_delete_row_number "$1" "$rwnumber"
+        if [[ `cat $1 | sed -n ''$rwnumber'p'` != "" ]];then
+            echo -e "${bg_yellow}The content of the row number you entered($rwnumber): ${clear}"
+            cat $1 | sed -n ''$rwnumber'p'
+            check_before_delete_row_number "$1" "$rwnumber"
+        else
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            echo -e "${red} * Entered row number not found .${clear}"   
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            rechoose_delete_byrow_options
+        fi
     ;;
     "exit" )
         rechoose_delete_from_options 
@@ -206,7 +216,7 @@ check_before_delete_row_inrange (){
     read 
     case $REPLY in 
         +([Yy|Yes|YES|yEs|YeS|yES|yeS]) ) 
-            sed -i ''$2','$3'd' $PWD/$1
+            sed -i ''$2','$3'd' $1
             echo -e "${bg_yellow}*Deleting Succesfully Done ${clear}" 
             rechoose_delete_byrow_options
         ;;
@@ -275,28 +285,28 @@ delete_by_row_fun () {
     shopt -s extglob
     while true
     do
-        if [[ -e $tbname && `cat $tbname` != "" ]];then
+        if [[ -e "$tbname.meta" && -e "$tbname.data" && `cat "$tbname.data"` != "" ]];then
             echo -e "${yellow} Metadata of the table :${clear}"
-            echo -e "${blue}`sed -n '1,3p' $tbname`${clear}"
+            echo -e "${blue}`awk '{ gsub(" "," ---> "); }1' "$tbname.meta"`${clear}"
             select numrow in "Delete row by Primary Key" "Delete by row number" "Delete rows in range" "Cancel"
             do 
                 echo -e "${bg_cyan}$numrow${clear}"
                 case $numrow in 
                 "Delete row by Primary Key" )
-                    delete_by_pk "$tbname"
+                    delete_by_pk "$tbname.data"
                 ;;
                 "Delete by row number" )
-                    delete_row_number "$tbname"
+                    delete_row_number "$tbname.data"
                 ;;
                 "Delete rows in range" )
-                    delete_in_range "$tbname"
+                    delete_in_range "$tbname.data"
                 ;;  
                 "Cancel" )
-                    delete_from_fun
+                    delete_from_fun 
                     break
                 esac
             done
-        elif [[ -e $tbname && `cat $tbname` = "" ]];then
+        elif [[ -e "$tbname.meta" && -e "$tbname.data" && `cat "$tbname.data"` = "" ]];then
             echo -e "${bg_red}**Your table is EMPTY**${clear}"
             rechoose_delete_from_options
             break
@@ -315,28 +325,50 @@ delete_by_row_fun () {
 }
 # ----------MAIN FUNCTION:DELETE A ROW INSIDE THE TABLE-------# ---------ENDED
 #--------------------------------------------------------------------------------------#
+#-(1/2)----------SUB FUNCTION :SELECTION OF SPEC--VALUE ------#
+check_if_entery_is_pk (){
+    if [[ $1 = $2 ]];then
+        echo -e "${red}***Primary Key Can not be deleted ..${clear}"
+        echo -e "${yellow}**To Delete Primary Key... Choose delete by row .. Delete by Primary Key. ${clear}"
+    else
+        #awk -v FI=$1 -v SI=$2 -i inplace 'BEGIN{FS=":"}{if($1="$FI"){!/gsub("$SI"," ")/}}END{}' $3
+        oldline=`sed -n ''$1'p' $3`
+        newline=`echo $oldline | sed -e 's/'$2'/ /'`
+        sed -i -e 's,'"$oldline"','"$newline"',' $3
+        echo -e "${green}Value deleted successfully${clear}"
+    fi
+}
 
-# (1/1)----------SUB FUNCTION :SELECTION OF SPEC--VALUE ------#
+# (2/2)----------SUB FUNCTION :SELECTION OF SPEC--VALUE ------#
 select_spec_value(){
     read -p "Enter the value to be deleted : " specvalue
-    if [[ `grep "$specvalue" $1` != \0 ]];then
+    if [[ `grep "$specvalue" $1` != "" &&  $specvalue != "" ]];then
         echo -e "${yellow}Rows That Contains Selected Value : ${clear}"
         echo -e "${magenta}`grep "$specvalue" $1`${clear}"
         read -p "Enter Primary Key Value  : " specpkvalue
-        if [[ `cut -d : -f1 $1 | grep "$specpkvalue"` == "" ]];then
+        if [[ $specpkvalue = "exit" ]];then
+            rechoose_delete_from_options
+        elif [[ $specpkvalue = "" ]];then
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
-            echo -e "${red} * Your entery is not Exist.${clear}"   
+            echo -e "${red} * Entery not found.${clear}"     
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
-            delete_by_spec_val
+            rechoose_delete_from_options
+        elif [[ `cut -d : -f1 $1 | grep "$specpkvalue"` == "" ]];then
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+        echo -e "${red} * Entery not found.${clear}"  
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            rechoose_delete_from_options
         else
-            grep -rl "$specpkvalue" $1 | xargs sed -i 's/'$specvalue'/ /'
+            check_if_entery_is_pk "$specpkvalue" "$specvalue" "$1"
             rechoose_delete_from_options
         fi
+    elif [[ $specvalue = "exit" ]];then 
+        rechoose_delete_from_options
     else 
         echo -e "${yellow}--------------------------------------------------------------------${clear}"
-        echo -e "${red} * Your entery is not Exist.${clear}"   
+        echo -e "${red} * Entery not found.${clear}"  
         echo -e "${yellow}--------------------------------------------------------------------${clear}"
-        select_spec_value
+        rechoose_delete_from_options
     fi
 }
 #------------------MAIN FUNCTION : DELETE A SPECIFIC VALUE ---------#
@@ -344,10 +376,10 @@ delete_by_spec_val () {
     echo -e "${bg_red} Hint: If you want to go back enter (exit)..${clear}"
     read -p "Enter the table name : " spectbname
     shopt -s extglob
-    if [[ -e $spectbname ]];then
+    if [[  -e "$spectbname.meta" && -e "$spectbname.data" ]];then
         echo -e "${yellow} Metadata of the table :${clear}"
-        echo -e "${blue}`sed -n '1,3p' $spectbname`${clear}"
-        select_spec_value "$spectbname"
+        echo -e "${blue}`awk '{ gsub(" "," ---> "); }1' "$spectbname.meta"`${clear}"
+        select_spec_value "$spectbname.data"
     elif [[ $spectbname = "exit" ]];then
         rechoose_delete_from_options
     else
@@ -358,105 +390,11 @@ delete_by_spec_val () {
     fi
 }
 # ----------MAIN FUNCTION:DELETE A SPECIFIC VALUE-------# ---------ENDED
-#--------------------------------------------------------------------------------------#
-# (1/3)----------SUB FUNCTION :CHECKING USING ROW IN RANGE------#
-check_before_delete_col (){
-    shopt -s extglob 
-    echo -e "${red} Are you Sure you want to delete this content (y/n) :${clear}"
-    read    
-    case $REPLY in 
-        +([Yy|Yes|YES|yEs|YeS|yES|yeS]) )
-            echo -e "${yellow}-------------------${clear}" 
-             cut -d : -f"$1" $2 | xargs sed -i 's/^*/""/' 
-            # awk -F : -vNU="$1" -i inplace '!/{print "$"NU}/' $2
-            #awk -vX="$1" -i inplace 'BEGIN{FS=":"}{if('$'X!=""){print ''}}END{}' $2
-            #cut -d : -f$1 $2 | sed -eir 's/+//g' 
-            # awk -vX="$1" -F ":" -i inplace '{$0=gensub(/\s*\S+/,"",X)}1' $2
-            echo -e "${bg_yellow}*Deleting Succesfully Done ${clear}" 
-            rechoose_delete_bycol_options
-        ;;
-        +([Nn|No|NO|nO]) )
-            echo -e "${yellow}*Deleting Step Canceled ${clear}"
-            check_before_delete_col
-        ;;
-        * )
-            echo -e "${red}*Wrong Entery${clear}"
-            check_before_delete_row_inrange
-    esac
-}
-# (2/3) ----------SUB FUNCTION :CHEHCK.COL.CONSTRAINTS---------#
-check_col_constraints_fun (){
-    case $1 in 
-        +([1-99999]) )
-            columns=$(awk 'BEGIN{FS=":"}{while(i<1){print NF; i++;}}END{}' $2)
-            if [[ "$1" -le "$columns" ]];then
-                echo -e "${bg_yellow}The content of column ($1) : ${clear}"
-                cut -d : -f$1 $2  
-                check_before_delete_col "$1" "$2"
-            else
-                echo -e "${yellow}--------------------------------------------------------------------${clear}"
-                echo -e "${red} * Your entery is not Exist.${clear}"   
-                echo -e "${yellow}--------------------------------------------------------------------${clear}"
-                delete_a_col
-            fi
-        ;;
-        [0] ) 
-            echo -e "${yellow}--------------------------------------------------------------------${clear}"
-            echo -e "${red} * Your entery is should not be Zero.${clear}"   
-            echo -e "${yellow}--------------------------------------------------------------------${clear}"
-            delete_a_col
-        ;;
-        *)
-            echo -e "${yellow}--------------------------------------------------------------------${clear}"
-            echo -e "${red} * Your entery is not number.${clear}"   
-            echo -e "${yellow}--------------------------------------------------------------------${clear}"
-            rechoose_delete_bycol_options
-        esac
-}
-#--(3/3) ----------SELECT-COL-NUM ---------#
-select_col_num (){ 
-    select coloption in "select single-column" "cancel"
-    do
-        echo -e "${bg_cyan}$coloption${clear}" 
-        case $coloption in 
-            "select single-column" )
-                read -p "Enter column number : " colnumber
-                check_col_constraints_fun "$colnumber" "$1"
-            ;;
-            "cancel" )
-                rechoose_delete_from_options
-                break
-            ;;
-            *)
-                echo -e "${yellow}--------------------------------------------------------------------${clear}"
-                echo -e "${red} * Your entery is Wrong.${clear}"   
-                echo -e "${yellow}--------------------------------------------------------------------${clear}"
-                select_col_num 
-        esac
-    done
-}
-#------------------MAIN FUNCTION : DELETE COLUMN ---------#
-delete_a_col (){
-    echo -e "${bg_red} Hint: If you want to go back enter (exit)..${clear}"
-    read -p "Enter the table name : " coltbname
-    shopt -s extglob
-    if [[ -e $coltbname ]];then
-        echo -e "${yellow} Metadata of the table :${clear}"
-        echo -e "${blue}`sed -n '1,$d p' $coltbname`${clear}"
-        select_col_num "$coltbname"
-    elif [[ $coltbname = "exit" ]];then
-        delete_from_fun
-    else
-        echo -e "${yellow}--------------------------------------------------------------------${clear}"
-        echo -e "${red} * Your entery table is not Exist.${clear}"   
-        echo -e "${yellow}--------------------------------------------------------------------${clear}"
-        delete_a_col
-    fi
-}   
+
 #-------------------------------------------DELETE_FROM------------------------------------------------------------#
 delete_from_fun (){
     echo -e "${bg_red}Hint : choose a number from the following list :${clear}"
-    select selection in "delete all data" "delete a row" "delete specific value" "delete column data" "Cancel"
+    select selection in "delete all data" "delete a row" "delete specific value"  "Cancel"
     do
         echo -e "${green} $selection ${clear}"
         case $selection in 
@@ -468,27 +406,15 @@ delete_from_fun (){
             ;;
             "delete specific value" )
                 delete_by_spec_val
-            ;;
-            "delete column data" )
-                delete_a_col
             ;;   
             "Cancel" )  
                 select_from_connect_options
                 break
+            ;;
+            * )
+                echo -e "${red}*Wrong Entery .. ${clear}"
+                delete_from_fun
         esac
     done
 }
 delete_from_fun
-
-
-
-# awk -vX="$1" -F : '{print $"X"}' $2
-#awk -F : -vNU="$1" -i inplace '!/{print "$"NU}/' $2
-# cut -d : -f$1 $2 | sed -i -r 's/\S+//3' 
-#awk -v NU="$1" -F : -i inplace '{$0=gensub(/\s*\S+/,"",NU)}1' file
-# awk -vX="$1" -i inplace '{$0=gensub(/\s*\S+$/,"",X)}1' $2
-# awk -vX="$1" -F : -i inplace '{$0=gensub(/\s*\S+/,"",X)}1' $2
-#awk -vX="$1" '!("$"X="")' $2
-####################################awk -vX="$1" -i inplace 'BEGIN{FS=":"}{if('$'X!=""){print ''}}END{}' $2  
-# sed -i 's/*/""/g' $2  
-# #cut -d : -f"$1" $2 |

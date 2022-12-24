@@ -170,7 +170,7 @@ select_by_row_fun () {
     do
         if [[ -e "$tbname.meta" && -e "$tbname.data" ]];then
             echo -e "${yellow} Metadata of the table :${clear}"
-            echo -e "${blue}`awk '{ gsub(" "," ---> "); }1' "$coltbname.meta"`${clear}"
+            echo -e "${blue}`awk '{ gsub(" "," ---> "); }1' "$tbname.meta"`${clear}"
             select numrow in "Select by Primary Key" "Select by row number" "Select by a Specific Value" "Cancel"
             do 
                 echo -e "${bg_cyan}$numrow${clear}"
@@ -346,7 +346,7 @@ select_multi_rows (){
     shopt -s extglob
     if [[ -e "$multitbname.meta" && -e "$multitbname.data" ]];then
         echo -e "${yellow} Metadata of the table :${clear}"
-        echo -e "${blue}`awk '{ gsub(" "," ---> "); }1' "$tballname.meta"`${clear}"
+        echo -e "${blue}`awk '{ gsub(" "," ---> "); }1' "$multitbname.meta"`${clear}"
         select multioption in "Select rows in range" "cancel"
         do
             echo -e "${bg_cyan}$multioption${clear}" 
