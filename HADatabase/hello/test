@@ -1,7 +1,7 @@
 id*:name:age
 pk:string:int
 
-1:hussein:25
+1:" ":25
 2:amr:45
 3:ghoraba:500
 4:ali:23
@@ -10,5 +10,5 @@ pk:string:int
 7:abduallah:25
 8:ahmed:26
 9:mohamed:17
-10:hussein:20
+10:" ":20
 

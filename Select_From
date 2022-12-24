@@ -346,7 +346,7 @@ select_multi_rows (){
     shopt -s extglob
     if [[ -e "$multitbname.meta" && -e "$multitbname.data" ]];then
         echo -e "${yellow} Metadata of the table :${clear}"
-        echo -e "${blue}`awk '{ gsub(" "," ---> "); }1' "$coltbname.meta"`${clear}"
+        echo -e "${blue}`awk '{ gsub(" "," ---> "); }1' "$tballname.meta"`${clear}"
         select multioption in "Select rows in range" "cancel"
         do
             echo -e "${bg_cyan}$multioption${clear}" 
