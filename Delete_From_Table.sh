@@ -315,6 +315,7 @@ delete_by_row_fun () {
 }
 # ----------MAIN FUNCTION:DELETE A ROW INSIDE THE TABLE-------# ---------ENDED
 #--------------------------------------------------------------------------------------#
+
 # (1/1)----------SUB FUNCTION :SELECTION OF SPEC--VALUE ------#
 select_spec_value(){
     read -p "Enter the value to be deleted : " specvalue
@@ -322,14 +323,13 @@ select_spec_value(){
         echo -e "${yellow}Rows That Contains Selected Value : ${clear}"
         echo -e "${magenta}`grep "$specvalue" $1`${clear}"
         read -p "Enter Primary Key Value  : " specpkvalue
-        if [[ `cut -d : -f1 $1 | grep "$specpkvalue"` -ne \0  ]];then
+        if [[ `cut -d : -f1 $1 | grep "$specpkvalue"` == "" ]];then
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
             echo -e "${red} * Your entery is not Exist.${clear}"   
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
             delete_by_spec_val
         else
-            echo -e "${bg_yellow}The row that contain Value of $specvalue: ${clear}"
-            #awk 'BEGIN{FS=":",VAL=$specvalue}{if($1==VAL){'
+            grep -rl "$specpkvalue" $1 | xargs sed -i 's/'$specvalue'//'
             rechoose_delete_from_options
         fi
     else 
@@ -349,7 +349,7 @@ delete_by_spec_val () {
         echo -e "${blue}`sed -n '1,3p' $spectbname`${clear}"
         select_spec_value "$spectbname"
     elif [[ $spectbname = "exit" ]];then
-        delete_from_fun
+        rechoose_delete_from_options
     else
         echo -e "${yellow}--------------------------------------------------------------------${clear}"
         echo -e "${red} * Your entery table is not Exist.${clear}"   
@@ -367,7 +367,8 @@ check_before_delete_col (){
     case $REPLY in 
         +([Yy|Yes|YES|yEs|YeS|yES|yeS]) )
             echo -e "${yellow}-------------------${clear}" 
-            awk -F : -vNU="$1" -i inplace '!/{print "$"NU}/' $2
+            
+            # awk -F : -vNU="$1" -i inplace '!/{print "$"NU}/' $2
             #awk -vX="$1" -i inplace 'BEGIN{FS=":"}{if('$'X!=""){print ''}}END{}' $2
             #cut -d : -f$1 $2 | sed -eir 's/+//g' 
             # awk -vX="$1" -F ":" -i inplace '{$0=gensub(/\s*\S+/,"",X)}1' $2

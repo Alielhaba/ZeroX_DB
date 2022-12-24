@@ -47,7 +47,6 @@ add_name_check_const_Exist_fun () {
             add_name_check_const_Exist_fun
         else
             mkdir $name
-            cd $name
             break
         fi
     done

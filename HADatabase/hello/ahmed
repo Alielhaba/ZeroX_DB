@@ -1,14 +1,14 @@
 id*:name:age
 pk:string:int
 
-1:hussein:25
-2:amr:45
+:hussein:5
+:amr:45
 3:ghoraba:500
-4:ali:23
-5:seif:22
-6:ibrahem:25
-7:abduallah:25
-8:ahmed:26
-9:mohamed:17
-10:hussein:20
+4:ali:3
+5:seif:2
+6:ibrahem:5
+7:abduallah:5
+8:ahmed:6
+9:mohamed:7
+:hussein:0
 
