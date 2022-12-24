@@ -329,7 +329,7 @@ select_spec_value(){
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
             delete_by_spec_val
         else
-            grep -rl "$specpkvalue" $1 | xargs sed -i 's/'$specvalue'//'
+            grep -rl "$specpkvalue" $1 | xargs sed -i 's/'$specvalue'/ /'
             rechoose_delete_from_options
         fi
     else 
@@ -367,7 +367,7 @@ check_before_delete_col (){
     case $REPLY in 
         +([Yy|Yes|YES|yEs|YeS|yES|yeS]) )
             echo -e "${yellow}-------------------${clear}" 
-            
+             cut -d : -f"$1" $2 | xargs sed -i 's/^*/""/' 
             # awk -F : -vNU="$1" -i inplace '!/{print "$"NU}/' $2
             #awk -vX="$1" -i inplace 'BEGIN{FS=":"}{if('$'X!=""){print ''}}END{}' $2
             #cut -d : -f$1 $2 | sed -eir 's/+//g' 

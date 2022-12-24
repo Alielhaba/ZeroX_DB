@@ -23,6 +23,7 @@ bg_cyan='\033[0;46m'
 #---------------------------------------Functions used-----------------------------------------------------
 
 rechoose_select_from_options () {
+    echo -e "${bg_red} Hint: If you want to go back enter (exit)...${clear}"    
     echo -e "${magenta}Please re-choose from the following list${clear}"
     echo -e "${cyan}1) Select all data in a table ${clear}"
 	echo -e "${cyan}2) Select by row ${clear}"
@@ -57,13 +58,18 @@ select_all_fun () {
     shopt -s extglob
     while true
     do
-        if [[ -e $tballname ]];then
+        if [[ -e "$tballname.meta" && -e "$tballname.data"  ]];then
             echo -e "${bg_yellow} ${tballname} Table Contents:${clear}"
-            #cat ${tballname}
-            column -s ":" -t  ${tballname}
+            echo -e "${yellow}------------------------------------${clear}"
+            echo -e "${bg_yellow}Table Metadata: ${clear}"
+            echo -e "${blue}`awk '{ gsub(" "," ---> "); }1' "$coltbname.meta"`${clear}"
+            echo -e "${yellow}------------------------------------${clear}"
+            echo -e "${bg_blue}Table Data:${clear}"
+            #awk '{ gsub(":","|"); }1' "$tballname.data"
+            column -t -s ":" "$tballname.data"
             rechoose_select_from_options 
             break
-        elif [[ $name = "exit" ]];then
+        elif [[ $tballname = "exit" ]];then
             rechoose_select_from_options
             break
         else
@@ -81,21 +87,20 @@ select_all_fun () {
 
 #-------------------------------------Sub Function Select by row--------------------------------------------------#
  # Select By Primary Key Function --------------------
-select-by-pk () {
+select_by_pk () {
     echo -e "${bg_red} Hint: If you want to go back enter (exit)..${clear}"
     read -p "Enter Primary Key Value : " pkvalue
     while true
     do
-        if [[ `cut -d : -f1 $tbname | grep "$pkvalue"` -ne \0 ]];then
+        if [[ $pkvalue = 0 ]];then
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            echo -e "${red} * Primary key should not with "ZER0" value .${clear}"             
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            rechoose_select_by_row_options
+            break
+        elif [[ `cut -d : -f1 $1 | grep "$pkvalue"` != "" ]];then
             echo -e "${bg_yellow}The row of $pkvalue Primary Key Value: ${clear}"
-            awk -v X="$pkvalue" '
-            BEGIN{FS=":"}
-            {
-                if ($1==X){
-                    print NR,$0
-                }
-            } 
-            END{}' $PWD/$tbname
+            awk -v X="$pkvalue" 'BEGIN{FS=":"}{if ($1==X){print $0}} END{}' $1
             rechoose_select_by_row_options
             break
         elif [[ $pkvalue = "exit" ]];then
@@ -104,10 +109,9 @@ select-by-pk () {
         else 
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
             echo -e "${red} * $pkvalue not found .${clear}"   
-            echo -e "${red} * Please Enter Primary Key value again.${clear}"          
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            rechoose_select_by_row_options
             break
-            select_by_pk
         fi
     done
 }
@@ -116,12 +120,18 @@ select-by-pk () {
 # Select By row number Function ---------------------------------------------#
 select_row_number () {
     read -p "Enter the number of row you want to view : " rwnumber 
-    echo -e "${bg_red} Hint: If you want to go back enter (exit)...${clear}"
     case $rwnumber in 
-    +([0-99]) )
-        echo -e "${bg_yellow}The content of the row number you entered($rwnumber): ${clear}"
-        cat $PWD/$tbname | sed -n ''$rwnumber'p'
-        rechoose_select_by_row_options
+    +([0-99999]) )
+        if [[ `cat $1 | sed -n ''$rwnumber'p'` != "" ]];then
+            echo -e "${bg_yellow}The content of the row number you entered($rwnumber): ${clear}"
+            cat $1 | sed -n ''$rwnumber'p'
+            rechoose_select_by_row_options
+        else
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            echo -e "${red} * Entered row number not found .${clear}"   
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            rechoose_select_by_row_options
+        fi
     ;;
     "exit" )
         rechoose_select_by_row_options
@@ -138,14 +148,14 @@ select_row_number () {
 # Select By Specific Value Function -------------------------------------------#
 select_by_spec_val () {
     read -p "Enter The Searching Targeted Value : " specvalue
-    if [[ `grep "$specvalue" $1` == false ]];then
+    if [[ `grep "$specvalue" $1` = "" ]];then
         echo -e "${yellow}--------------------------------------------------------------------${clear}"
         echo -e "${red} * Your entery is not Exist.${clear}"   
         echo -e "${yellow}--------------------------------------------------------------------${clear}"
-        select_by_spec_val
+        rechoose_select_by_row_options
     else
         echo -e "${bg_yellow}The row that contain Value of $specvalue: ${clear}"
-        grep "$specvalue" $tbname
+        grep "$specvalue" $1
         rechoose_select_by_row_options
     fi 
 }
@@ -158,27 +168,31 @@ select_by_row_fun () {
     shopt -s extglob
     while true
     do
-        if [[ -e $tbname ]];then
+        if [[ -e "$tbname.meta" && -e "$tbname.data" ]];then
             echo -e "${yellow} Metadata of the table :${clear}"
-            echo -e "${blue}`sed -n '1,3p' $tbname`${clear}"
+            echo -e "${blue}`awk '{ gsub(" "," ---> "); }1' "$coltbname.meta"`${clear}"
             select numrow in "Select by Primary Key" "Select by row number" "Select by a Specific Value" "Cancel"
             do 
                 echo -e "${bg_cyan}$numrow${clear}"
                 case $numrow in 
-                "Select by Primary Key" )
-                    select-by-pk
-                ;;
-                "Select by row number" )
-                    select_row_number
-                ;;
-                "Select by a Specific Value" )
-                    select_by_spec_val "$tbname"
-                ;;  
-                "Cancel" )
-                    select_from_fun
-                    break
+                    "Select by Primary Key" )
+                        select_by_pk "$tbname.data"
+                    ;;
+                    "Select by row number" )
+                        select_row_number "$tbname.data"
+                    ;;
+                    "Select by a Specific Value" )
+                        select_by_spec_val "$tbname.data"
+                    ;;  
+                    "Cancel" )
+                        rechoose_select_from_options    
+                        break
+                    ;;
+                    * )
+                        rechoose_select_by_row_options
                 esac
             done
+            break
         elif [[ $tbname == "exit" ]];then
             rechoose_select_from_options
             break
@@ -195,20 +209,27 @@ select_by_row_fun () {
 
 #---------------------------------------Function Select by column-------------------------------------------#
 #---------------------------------------Sub Function Select by row------------------------------------------------#
-#-----------------------sub-function----Select Single Column- Check Constraints on the selected column------------
+rechoose_select_by_column_options (){
+    echo -e "${magenta}Please re-choose from the following list${clear}"
+    echo -e "${cyan}1) Select single-column ${clear}"
+	echo -e "${cyan}2) cancel ${clear}"
+}
+
+#-1/2-------------------sub-function----Select Single Column- Check Constraints on the selected column------------
 check_col_constraints_fun (){
     case $1 in 
         +([1-99999]) )
-            columns=$(awk 'BEGIN{FS=":"}{while(i<1){print NF; i++;}}END{}' $coltbname)
+            columns=$(awk 'BEGIN{FS=":"}{while(i<1){print NF; i++;}}END{}' $2)
             if [[ "$1" -le "$columns" ]];then
                 echo -e "${bg_yellow}The content of column ($colnumber) : ${clear}"
-                cut -d : -f$colnumber $coltbname
+                cut -d : -f$1 $2
                 rechoose_select_from_options
             else
                 echo -e "${yellow}--------------------------------------------------------------------${clear}"
                 echo -e "${red} * Your entery is not Exist.${clear}"   
                 echo -e "${yellow}--------------------------------------------------------------------${clear}"
                 select_col_num 
+                break
             fi
         ;;
         [0] ) 
@@ -224,28 +245,29 @@ check_col_constraints_fun (){
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
             echo -e "${red} * Your entery is not number.${clear}"   
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
-            select_col_num 
+            select_col_num
     esac
 }
-#-----------------------sub-function----Select Single Column-----------------------------------------------
+#-2/2-----------------sub-function----Select Single Column-----------------------------------------------
 select_col_num (){ 
     select coloption in "select single-column" "cancel"
     do
-        echo -e "${bg_cyan}$coloption${clear}" 
+        echo -e "${green}$coloption${clear}" 
         case $coloption in 
             "select single-column" )
                 read -p "Enter column number : " colnumber
-                check_col_constraints_fun "$colnumber"
+                check_col_constraints_fun "$colnumber" "$1"
+                break
             ;;
             "cancel" )
-                select_from_fun
+                rechoose_select_from_options
                 break
             ;;
             *)
                 echo -e "${yellow}--------------------------------------------------------------------${clear}"
                 echo -e "${red} * Your entery is Wrong.${clear}"   
                 echo -e "${yellow}--------------------------------------------------------------------${clear}"
-                select_col_num 
+                rechoose_select_by_column_options 
         esac
     done
 }
@@ -253,19 +275,26 @@ select_col_num (){
 select_by_col (){
     read -p "Enter the table name : " coltbname
     shopt -s extglob
-    if [[ -e $coltbname ]];then
+    if [[ -e "$coltbname.meta" && -e "$coltbname.data" ]];then
         echo -e "${yellow} Metadata of the table :${clear}"
-        echo -e "${blue}`sed -n '1,3p' $coltbname`${clear}"
-        select_col_num
+        echo -e "${blue}`awk '{ gsub(" "," ---> "); }1' "$coltbname.meta"`${clear}"
+        select_col_num "$coltbname.data" 
+    elif [[ $coltbname = "exit" ]];then
+        rechoose_select_from_options
     else 
-            echo -e "${yellow}--------------------------------------------------------------------${clear}"
-            echo -e "${red} * Your entery table is not Exist.${clear}"   
-            echo -e "${yellow}--------------------------------------------------------------------${clear}"
-            select_from_fun
+        echo -e "${yellow}--------------------------------------------------------------------${clear}"
+        echo -e "${red} * Your entery table is not Exist.${clear}"   
+        echo -e "${yellow}--------------------------------------------------------------------${clear}"
+        rechoose_select_from_options
     fi
 }   
 #--------------------------------------------------------------------------------------------------------------------------------------------------------
 #--------------------------------------- Function Select by Multi-rows ------------------------------------------#
+rechoose_multi_rows_options(){
+    echo -e "${magenta}Please re-choose from the following list${clear}"
+    echo -e "${cyan}1) Select in range ${clear}"
+	echo -e "${cyan}2) cancel ${clear}"
+}
 #---------------------------------------Sub Function Select by row------------------------------------------------#
 select_in_range (){
     read -p "Please enter start point(row number): " startpoint
@@ -276,22 +305,22 @@ select_in_range (){
                 +([1-99999]) )
                     if [[ "$startpoint" -lt "$endpoint" ]];then
                         echo -e "${BOLD}`awk -vx="$startpoint" -vy="$endpoint"  'NR>=x && NR<=y {print}' $1`${clear}"
-                        select_from_fun
+                        rechoose_select_from_options
                     else
                         echo -e "${yellow}--------------------------------------------------------------------${clear}"
                         echo -e "${red} * End Point should not be smaller than Start Point.${clear}"   
                         echo -e "${yellow}--------------------------------------------------------------------${clear}"
-                        select_multi_rows
+                        select_in_range
                     fi
                 ;;
                 "exit" )
-                    select_multi_rows   
+                    rechoose_multi_rows_options  
                 ;;
                 * )
-                echo -e "${yellow}--------------------------------------------------------------------${clear}"
-                echo -e "${red} * Your entery is Wrong.${clear}"   
-                echo -e "${yellow}--------------------------------------------------------------------${clear}"
-                select_multi_rows
+                    echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                    echo -e "${red} * Your entery is Wrong.${clear}"   
+                    echo -e "${yellow}--------------------------------------------------------------------${clear}"
+                    select_in_range
             esac
         ;;
         [0] )
@@ -302,31 +331,32 @@ select_in_range (){
         ;;
         "exit" )
             break
-            select_multi_rows 
+            rechoose_multi_rows_options 
         ;;
         *)
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
             echo -e "${red} * Your entery is Wrong.${clear}"   
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
-            select_multi_rows
+            select_in_range
     esac
 }
 #------------------------------------Main Function Select by Multi-rows ------------------------------------------------#
 select_multi_rows (){
     read -p "Enter the table name : " multitbname
     shopt -s extglob
-    if [[ -e $coltbname ]];then
+    if [[ -e "$multitbname.meta" && -e "$multitbname.data" ]];then
         echo -e "${yellow} Metadata of the table :${clear}"
-        echo -e "${blue}`sed -n '1,3p' $coltbname`${clear}"
+        echo -e "${blue}`awk '{ gsub(" "," ---> "); }1' "$coltbname.meta"`${clear}"
         select multioption in "Select rows in range" "cancel"
         do
             echo -e "${bg_cyan}$multioption${clear}" 
             case $multioption in 
                 "Select rows in range" )
-                    select_in_range "$multitbname"
+                    select_in_range "$multitbname.data"
+                    break
                 ;;
                 "cancel" )
-                    select_from_fun
+                    rechoose_select_from_options
                     break
                 ;;
                 *)
@@ -337,7 +367,7 @@ select_multi_rows (){
             esac
         done
     elif [[ $multitbname = "exit" ]];then
-        select_from_fun
+        rechoose_select_from_options
     else 
         echo -e "${yellow}--------------------------------------------------------------------${clear}"
         echo -e "${red} * Your entery table is not Exist.${clear}"   
@@ -350,6 +380,7 @@ select_multi_rows (){
 #Select from Function
 select_from_fun (){
     echo -e "${bg_magenta}Hint : choose a number from the following list :${clear}"
+    echo -e "${bg_red} Hint: If you want to go back enter (exit)...${clear}"
     select selection in "Select all data in a table" "Select by row" "Select by column" "Select by multi-rows" "Cancel"
     do
         echo -e "${green} $selection ${clear}"
