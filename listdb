@@ -22,10 +22,9 @@ bg_cyan='\033[0;46m'
 # --------------------------------------------------------------------------------------------------------------
 
 #Listing Databases inside the HADatabase
-let databaseinc=1
 if [[ `ls` == "" ]];then
     echo -e "${yellow}--------------------------------------------------------------------${clear}"
-    echo -e "${red}Sir..There is no Database yet${clear}"
+    echo -e "${red}There is no Database yet${clear}"
     echo -e "${yellow}--------------------------------------------------------------------${clear}"
 else
     echo -e "${BOLD}`ls`${clear}"

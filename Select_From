@@ -65,7 +65,6 @@ select_all_fun () {
             echo -e "${blue}`awk '{ gsub(" "," ---> "); }1' "$tballname.meta"`${clear}"
             echo -e "${yellow}------------------------------------${clear}"
             echo -e "${bg_blue}Table Data:${clear}"
-            #awk '{ gsub(":","|"); }1' "$tballname.data"
             column -t -s ":" "$tballname.data"
             rechoose_select_from_options 
             break
@@ -171,6 +170,7 @@ select_by_row_fun () {
         if [[ -e "$tbname.meta" && -e "$tbname.data" ]];then
             echo -e "${yellow} Metadata of the table :${clear}"
             echo -e "${blue}`awk '{ gsub(" "," ---> "); }1' "$tbname.meta"`${clear}"
+            echo -e "${yellow}*------------------------------------------------------*${clear}"
             select numrow in "Select by Primary Key" "Select by row number" "Select by a Specific Value" "Cancel"
             do 
                 echo -e "${bg_cyan}$numrow${clear}"
@@ -278,6 +278,7 @@ select_by_col (){
     if [[ -e "$coltbname.meta" && -e "$coltbname.data" ]];then
         echo -e "${yellow} Metadata of the table :${clear}"
         echo -e "${blue}`awk '{ gsub(" "," ---> "); }1' "$coltbname.meta"`${clear}"
+        echo -e "${yellow}*------------------------------------------------------*${clear}"
         select_col_num "$coltbname.data" 
     elif [[ $coltbname = "exit" ]];then
         rechoose_select_from_options
@@ -347,6 +348,7 @@ select_multi_rows (){
     if [[ -e "$multitbname.meta" && -e "$multitbname.data" ]];then
         echo -e "${yellow} Metadata of the table :${clear}"
         echo -e "${blue}`awk '{ gsub(" "," ---> "); }1' "$coltbname.meta"`${clear}"
+        echo -e "${yellow}*------------------------------------------------------*${clear}"
         select multioption in "Select rows in range" "cancel"
         do
             echo -e "${bg_cyan}$multioption${clear}" 

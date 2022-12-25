@@ -19,13 +19,16 @@ bg_blue='\033[0;44m'
 bg_magenta='\033[0;45m'
 bg_cyan='\033[0;46m'
 # --------------------------------------------------------------------------------------------------------------
-#Listing Files inside the Database
 
+#Listing Files inside the Database
+echo -e "${green}\n*----------------- * List Tables * -----------------*\n${clear}"
 if [[ `ls` == "" ]];then
     echo -e "${yellow}--------------------------------------------------------------------${clear}"
-    echo -e "${red}Sir..There is no Tables yet${clear}"
+    echo -e "${red}There is no Tables yet${clear}"
     echo -e "${yellow}--------------------------------------------------------------------${clear}"
+    select_from_connect_options
 else
     echo -e "${BOLD}`ls`${clear}"
+    select_from_connect_options
 fi
 

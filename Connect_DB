@@ -20,50 +20,67 @@ bg_blue='\033[0;44m'
 bg_magenta='\033[0;45m'
 bg_cyan='\033[0;46m'
 # --------------------------------------------------------------------------------------------------------------
+
+#rechoose from connect options ---------------------------------------------------------------------------------
+select_from_connect_options () {
+    echo -e "${magenta}Please re-choose from the following list${clear}"
+    echo -e "${cyan}1) List Table ${clear}"
+	echo -e "${cyan}2) Create Table ${clear}"
+    echo -e "${cyan}3) Drop Table ${clear}"
+    echo -e "${cyan}4) Insert Into Table ${clear}"
+    echo -e "${cyan}5) Select From Table${clear}"
+    echo -e "${cyan}6) Delete From Table ${clear}"
+    echo -e "${cyan}7) Update Table ${clear}"
+    echo -e "${cyan}8) Cancel ${clear}"
+}
+#-----------------------------------------------------------------------------------------------------------------
 #Function of Database Conncection
 Connect_DB_Func () {
-    read -p "Enter the Database name : " Connect_DB
+    echo -e "${bg_red}*Hint : Enter (exit) for cancelation.${clear}"
+    read -p "Enter The Database Name : " Connect_DB
     shopt -s extglob
     while true
     do
         if [[ -e $Connect_DB ]];then
             cd $Connect_DB
-            select menu in "list table" "create table" "drop table" "insert into table" "select from table" "delete from table" "update table" "Exit"
+            select menu in "List Tables" "Create Table" "Drop Table" "Insert Into Table" "Select From Table" "Delete From Table" "Update Table" "Cancel"
                 do 
+                echo -e "${green}$menu${clear}"
                 case $menu in 
-                    "list table" ) 
+                    "List Tables" ) 
                         source List_Table 
                         ;;		
-                    "create table" )
+                    "Create Table" )
                         source Create_Table 
                         ;;
-                    "drop table" ) 
+                    "Drop Table" ) 
                         source Drop_Table 
                         ;;	
-                    "insert into table" )
+                    "Insert Into Table" )
                         source Insert_Table
                         ;;
-                    "select from table" )  
+                    "Select From Table" )  
                         source Select_From 
                         ;;		
-                    "delete from table" )
+                    "Delete From Table" )
                         source Delete_From_Table.sh 
                         ;; 
-                    "update table" ) 
+                    "Update Table" ) 
                         source Update_Table
                         ;;	
-                    "Exit" ) 
+                    "Cancel" ) 
                         cd ..
                         break;  
                         ;;			
                     * )
-                        echo -e "${red} * Enter a valid number .${clear}" 
-                        
+                        echo -e "${red} *Enter a valid number .${clear}" 
                 esac
             done
             break;  
+        elif [[ $Connect_DB = "exit" ]];then
+            break
         else
-            echo -e "${yellow}----------------------------- ---------------------------------------${clear}"
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
             echo -e "${red} * $Connect_DB Database not found .${clear}"   
             echo -e "${red} * Please Enter Database Name again .${clear}"          
             echo -e "${yellow}--------------------------------------------------------------------${clear}"

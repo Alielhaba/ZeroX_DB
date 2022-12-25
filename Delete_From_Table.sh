@@ -62,12 +62,12 @@ check_before_delete_all (){
     echo -e "${red} Are you Sure you want to delete this content (y/n) :${clear}"
     read 
     case $REPLY in 
-        +([Yy|Yes|YES|yEs|YeS|yES|yeS]) ) 
+        [yY] ) 
             sed -i d $1
             echo -e "${bg_yellow}* Succesfully Done ${clear}"
             rechoose_delete_from_options 
         ;;
-        +([Nn|No|NO|nO]) )
+        [nN] )
             echo -e "${yellow}* Step Canceled ${clear}"
             rechoose_delete_from_options
         ;;
@@ -119,12 +119,12 @@ check_before_delete_pk(){
     echo -e "${red} Are you Sure you want to delete this content (y/n) :${clear}"
     read 
     case $REPLY in 
-        +([Yy|Yes|YES|yEs|YeS|yES|yeS]) ) 
+        [yY] ) 
             awk -v X="$2" -i inplace 'BEGIN{FS=":"}{if($1 != X){print $0}}END{}' $1
             echo -e "${bg_yellow}* Succesfully Done ${clear}" 
             rechoose_delete_byrow_options
         ;;
-        +([Nn|No|NO|nO]) )
+        [nN] )
             echo -e "${yellow}* Step Canceled ${clear}"
             rechoose_delete_byrow_options
         ;;
@@ -166,12 +166,12 @@ check_before_delete_row_number(){
     echo -e "${red} Are you Sure you want to delete this content (y/n) :${clear}"
     read 
     case $REPLY in 
-        +([Yy|Yes|YES|yEs|YeS|yES|yeS]) ) 
+        [yY] ) 
             sed -i ''$2'd' $1
             echo -e "${bg_yellow}*Deleting Succesfully Done ${clear}" 
             rechoose_delete_byrow_options
         ;;
-        +([Nn|No|NO|nO]) )
+        [nN] )
             echo -e "${yellow}*Deleting Step Canceled ${clear}"
             rechoose_delete_byrow_options
         ;;
@@ -215,12 +215,12 @@ check_before_delete_row_inrange (){
     echo -e "${red} Are you Sure you want to delete this content (y/n) :${clear}"
     read 
     case $REPLY in 
-        +([Yy|Yes|YES|yEs|YeS|yES|yeS]) ) 
+        [yY] ) 
             sed -i ''$2','$3'd' $1
             echo -e "${bg_yellow}*Deleting Succesfully Done ${clear}" 
             rechoose_delete_byrow_options
         ;;
-        +([Nn|No|NO|nO]) )
+        [nN] )
             echo -e "${yellow}*Deleting Step Canceled ${clear}"
             rechoose_delete_byrow_options
         ;;

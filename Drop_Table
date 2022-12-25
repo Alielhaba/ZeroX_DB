@@ -21,8 +21,7 @@ bg_cyan='\033[0;46m'
 #------------------------------------------------------------------------------------------------
 #Drop_Function 
 #------------------------------------------------------------------------------------------------
-Check_Before_Drop_Table()
-{
+Check_Before_Drop_Table() {
     shopt -s extglob 
     echo -e "${red} Are You Sure You Want To Drop {$1} Table (y/n) :${clear}"
     read 
@@ -30,66 +29,52 @@ Check_Before_Drop_Table()
         [yY] ) 
             rm "$1.data"
             rm "$1.meta"
-           echo -e "${green} -- Table Droped Successfully -- \n${clear}"
+            echo -e "${green} -- Table Droped Successfully -- \n${clear}"
+            select_from_connect_options
         ;;
         [Nn] )
             echo -e "${yellow}*Droped Step Canceled ${clear}"
+            select_from_connect_options
         ;;
         * )
             echo -e "${red}*Wrong Entery${clear}"
-            
+            Check_Before_Drop_Table
     esac
 }
 #------------------------------------------------------------------------------------------------
 #Drop_Function 
 #------------------------------------------------------------------------------------------------
-
-Drop_Table_Func()
-{
-    if [[  $1 == "" ]]; then 
-
+Drop_Table_Func() {
+    if [[ $1 = "exit" ]];then
+        select_from_connect_options
+    elif [[  $1 == "" ]]; then 
         echo -e "${red}[ Error ] --- Can't Read Value You Entered --- ${clear}"
         Back_To_Menu
-
     elif [[ `ls | grep -i "^$1.data$"` == "" && `ls | grep -i "^$1.meta$"` == ""  ]];then
-        
-        echo -e "${red}\n[ Error ] --- Table Name Not Exist --- ${clear}" 
+        echo -e "${red}\n[ Error ] --- Table Name Not Exist --- \n${clear}" 
         Back_To_Menu  
-
     else 
-        echo -e "${green}----------------------------------- * Drop Table * ------------------------------ \n${clear}"
-
+        echo -e "${green}\n*----------------- * Drop Table * -----------------*\n${clear}"
         Check_Before_Drop_Table $1
-
     fi
 }
-
 #------------------------------------------------------------------------------------------------
 #Back_To_Menu_Function 
 #------------------------------------------------------------------------------------------------
-
-Back_To_Menu ()
-{
-        echo -e "${green}-------------------------------------- * Select Menu * ------------------------------------${clear}"
-
-        select Menu in  "Insert Table Name Again" "Exit"
-        do
-            case $Menu in
-                "Insert Table Name Again")
-                    read -p "Enter Table Name : " D_Table
-                    Drop_Table_Func $D_Table 
-                    break
-                    ;;
-                "Exit")
-                    echo  "Exit"
-                    break
-                    ;;
-                    *)
-                    echo -e "${red}[ Error ] --- Enter Valid Number Please --- ${clear}" 
-                    Back_To_Menu
-                    ;;
-            esac
-        done
+Back_To_Menu () {
+    echo -e "1- Insert Table Name Again\n2- Cancel"
+    read menu
+    if [[ $menu = 1 ]];then
+        echo -e "${green}Insert Table Menu${clear}"
+        read -p "Enter Table Name : " D_Table
+        Drop_Table_Func $D_Table 
+    elif [[ $menu = 2 ]];then 
+        echo -e "${green}Cancel${clear}"
+        select_from_connect_options
+    else 
+        echo -e "${red}[ Error ] --- Enter Valid Number Please --- ${clear}" 
+        Back_To_Menu
+    fi
 }
 
 #------------------------------------------------------------------------------------------------
