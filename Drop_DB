@@ -19,6 +19,31 @@ bg_yellow='\033[0;43m'
 bg_blue='\033[0;44m'
 bg_magenta='\033[0;45m'
 bg_cyan='\033[0;46m'
+
+#------------------------------------------------------------------------------------------------
+#Drop_Function 
+#------------------------------------------------------------------------------------------------
+Check_Before_Drop_DataBase()
+{
+    shopt -s extglob 
+    echo -e "${red} Are You Sure You Want To Drop {$1} Table (y/n) :${clear}"
+    read 
+    case $REPLY in 
+        [yY] ) 
+            rm -r $name
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            echo -e "${green} * $name Database was droped successfully.${clear}"           
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+        ;;
+        [Nn] )
+            echo -e "${yellow}*Droped Step Canceled ${clear}"
+        ;;
+        * )
+            echo -e "${red}*Wrong Entery${clear}"
+            
+    esac
+}
+
 # --------------------------------------------------------------------------------------------------------------
 #Rechoose drop database options
 rechoose_drop_db_options (){
@@ -36,11 +61,9 @@ Drop_DB_Func () {
        
         if [[ -e $name ]];then
 
-            rm -r $name
-                echo -e "${yellow}--------------------------------------------------------------------${clear}"
-                echo -e "${green} * $name Database was droped successfully.${clear}"           
-                echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            Check_Before_Drop_DataBase $name
             break
+            
         elif [[ $name = "exit" ]];then
             rechoose_drop_db_options
             break
@@ -49,8 +72,10 @@ Drop_DB_Func () {
             echo -e "${red} * $name not found .${clear}"   
             echo -e "${red} * Please Enter Database Name again .${clear}"          
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
-            Drop_DB_Func
+            rechoose_drop_db_options
+            break
         fi
+
     done
 }
 

@@ -66,7 +66,7 @@ create_db_fun (){
                 echo -e "${yellow}--------------------------------------------------------------------${clear}"
             ;;
             "Quit" )
-                exit 
+                break 
             ;;
             * )
                 echo -e "${red}Entered Choice is not available***${clear}"

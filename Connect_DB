@@ -37,7 +37,7 @@ Connect_DB_Func () {
                     "create table" )
                         source Create_Table 
                         ;;
-                    "Drop table" ) 
+                    "drop table" ) 
                         source Drop_Table 
                         ;;	
                     "insert into table" )
@@ -50,7 +50,7 @@ Connect_DB_Func () {
                         source Delete_From_Table.sh 
                         ;; 
                     "update table" ) 
-                        echo "Update table"  
+                        source Update_Table
                         ;;	
                     "Exit" ) 
                         cd ..
@@ -59,8 +59,8 @@ Connect_DB_Func () {
                     * )
                         echo -e "${red} * Enter a valid number .${clear}" 
                         
-                    esac
-                done
+                esac
+            done
             break;  
         else
             echo -e "${yellow}----------------------------- ---------------------------------------${clear}"

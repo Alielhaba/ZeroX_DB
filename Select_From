@@ -62,7 +62,7 @@ select_all_fun () {
             echo -e "${bg_yellow} ${tballname} Table Contents:${clear}"
             echo -e "${yellow}------------------------------------${clear}"
             echo -e "${bg_yellow}Table Metadata: ${clear}"
-            echo -e "${blue}`awk '{ gsub(" "," ---> "); }1' "$coltbname.meta"`${clear}"
+            echo -e "${blue}`awk '{ gsub(" "," ---> "); }1' "$tballname.meta"`${clear}"
             echo -e "${yellow}------------------------------------${clear}"
             echo -e "${bg_blue}Table Data:${clear}"
             #awk '{ gsub(":","|"); }1' "$tballname.data"
@@ -346,7 +346,7 @@ select_multi_rows (){
     shopt -s extglob
     if [[ -e "$multitbname.meta" && -e "$multitbname.data" ]];then
         echo -e "${yellow} Metadata of the table :${clear}"
-        echo -e "${blue}`awk '{ gsub(" "," ---> "); }1' "$multitbname.meta"`${clear}"
+        echo -e "${blue}`awk '{ gsub(" "," ---> "); }1' "$coltbname.meta"`${clear}"
         select multioption in "Select rows in range" "cancel"
         do
             echo -e "${bg_cyan}$multioption${clear}" 

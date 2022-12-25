@@ -1,0 +1,5 @@
+id(PK) int
+name var
+name(PK) var
+id(PK) int
+as(PK) var

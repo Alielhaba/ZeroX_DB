@@ -1,0 +1,242 @@
+#!/user/bin/bash
+
+#change color to blue before printing
+# Color variables
+BOLD="\033[1m"
+red='\033[0;31m'
+green='\033[0;32m'
+yellow='\033[0;33m'
+blue='\033[0;34m'
+magenta='\033[0;35m'
+cyan='\033[0;36m'
+# Clear the color after that
+clear='\033[0m'
+# Background Color variables
+bg_red='\033[0;41m'
+bg_green='\033[0;42m'
+bg_yellow='\033[0;43m'
+bg_blue='\033[0;44m'
+bg_magenta='\033[0;45m'
+bg_cyan='\033[0;46m'
+
+declare arr_Type
+declare arr_column
+declare Name
+#------------------------------------------------------------------------------------------------
+#Insert_Function 
+#------------------------------------------------------------------------------------------------
+Update_Func ()
+{
+     
+    if [[  $1 == \0 ]]; then 
+
+        echo -e "${red}[ Error ] --- Can't Read Value You Entered --- ${clear}"
+        Back_To_Menu
+
+    elif [[ `ls | grep -i "^$1.data$"` == "" && `ls | grep -i "^$1.meta$"` == ""  ]];then
+        
+        echo -e "${red}\n[ Error ] --- Table Name Not Exist --- ${clear}" 
+        Back_To_Menu  
+
+    else 
+
+        echo -e "${green}*------------------------------------- * Update Table * --------------------------------* \n${clear}"
+
+        Update_Values_Func $1
+
+    fi
+}
+
+#------------------------------------------------------------------------------------------------
+#Back_To_Menu_Function 
+#------------------------------------------------------------------------------------------------
+Back_To_Menu ()
+{
+    echo -e "${green}*-------------------------------------- * Select Menu * ------------------------------------*${clear}"
+
+    select Menu in  "Insert Table Name Again" "Exit"
+    do
+        case $Menu in
+            "Insert Table Name Again")
+                read -p "Enter Table Name : " Table_Name
+                Update_Func $Table_Name 
+                break
+                ;;
+            "Exit")
+                echo  "Exit"
+                break
+                ;;
+                *)
+                echo -e "${red}[ Error ] --- Enter Valid Number Please --- ${clear}" 
+                Back_To_Menu
+                ;;
+        esac
+
+    done
+        
+}
+
+#------------------------------------------------------------------------------------------------
+#Update_Menu_Function 
+#------------------------------------------------------------------------------------------------
+
+Update_Menu ()
+{
+    echo -e "${green}*-------------------------------------- * Update Menu * ------------------------------------*${clear}"
+
+    select item in "Update Full User Data" "Update Specific Value" "Exit"
+        do
+            case $item in 
+                "Update Full User Data")
+                    Update_Full_Data_Func
+                    ;;
+                "Update Specific Value")
+                    Update_Specific_Value
+                    ;;
+                "Exit")
+                    echo " Exit"
+                    break
+                    ;;
+                *)
+                echo -e "${red}[ Error ] --- Enter Valid Number Please --- ${clear}" 
+                Update_Menu
+            esac
+        done
+
+        
+}
+
+#------------------------------------------------------------------------------------------------
+#Update_Values_Func
+#-----------------------------------------------------------------------------------------------
+
+Update_Full_Data_Func ()
+{
+   
+    read -p "Insert your ${arr_column[0]} " PK
+
+    if [[ `awk -F ":" '{print $1}' "$Name.data" | grep "$PK" ` == "" ]];then
+
+        echo "${red} the is no value : ${green}"
+        Update_Full_Data_Func
+
+    else
+
+        line=$PK
+        for i in `awk -F " " '{print $2}' $Name.meta`
+        do
+            dtype_arr[$x]=$i
+            x+=1
+        done
+        for ((i=1;i<${#arr_column[@]};i++));
+        do
+
+            coll=${arr_column[$i]}
+            read -p "Insert New Value Of ($coll) :  " new_val
+            if [[ "${dtype_arr[i]}" == "int" ]]; then
+                while ! [[ $new_val =~ ^[0-9]*$  ]];
+                do
+                    read -p "[ Error ] --- $new_val should be int --- " new_val
+                done
+            elif [[ "${dtype_arr[i]}" == "var" ]];then
+                while ! [[ $new_val =~ ^[a-zA-Z]*$ ]];
+                do
+                    read -p "[ Error ] --- $new_val should be var --- " new_val
+                done
+            fi
+            line=$line":"$new_val
+
+        done
+
+        old=`sed -n "$PK p" $Name.data`
+        sed -i "s/$old/$line/" $Name.data
+        echo -e "${green} data updated successfully${clear}"
+
+    fi
+}
+
+Update_Specific_Value(){
+    x=0
+    y=0
+    declare -a dis_arr
+    declare -a arr_1
+    old=`sed -n "$PK p" $Name.data`
+    
+    read -p "Insert your ${arr_column[0]} " PK
+
+    if [[ `awk -F ":" '{print $1}' "$Name.data" | grep "$PK" ` == "" ]];then
+
+        echo "${red} the is no value : ${clear}"
+        Update_Specific_Value
+
+    else
+
+        for i in `awk -F " " '{print $1}' $Name.meta`
+        do
+            dis_arr[$x]=$i
+            x+=1
+        done
+
+        echo -e "${green}*-----------------------------------------------------------------------------------------*${clear}"
+        echo -e "${green} which value do you want to update ? \n${clear}"
+        read -p ">> " updated_col
+        if [[  " ${dis_arr[*]} " =~ " ${updated_col} " ]];then
+
+            read -p "Enter new value of ($updated_col): " New_value
+
+            for i in "${!dis_arr[@]}"
+            do
+                if [[ "${dis_arr[$i]}" == $updated_col ]];then
+                    Num=$i
+                fi
+            done
+            IFS=":"
+            for i in $old
+            do 
+                old_arr[$y]=$i":"
+                y+=1
+            done 
+        else
+            echo "there is no column with this name !!!"
+            echo " Re-enter your id please "
+            Update_Specific_Value
+        fi
+
+    fi
+      store=`echo "${old_arr[@]}" | sed "s|${old_arr[Num]}|$New_value":"|"`
+      sed -i "s/$old/$store/" $Name.data
+      echo -e "${green}Value updated successfully${clear}"
+}
+
+#------------------------------------------------------------------------------------------------
+#Update_Values_Func
+#-----------------------------------------------------------------------------------------------
+
+Update_Values_Func ()
+{
+
+    echo -e "${green}*------------------------------------- * Cloumn Name * ----------------------------------*${clear}"
+
+    for j in `awk -F " " '{print $1}' "$1.meta"` 
+    do 
+        arr_column+=("$j")
+    done
+
+    for j in `awk -F " " '{print $2}' "$1.meta"` 
+    do 
+        arr_Type+=("$j")
+    done
+
+    column -t -s " " -o " --> " "$1.meta"
+
+    #calling Function to select what type of update
+    Update_Menu
+}
+
+#------------------------------------------------------------------------------------------------
+#Calling
+#-----------------------------------------------------------------------------------------------
+
+read -p "Insert Table Name: " Name 
+
+ Update_Func $Name

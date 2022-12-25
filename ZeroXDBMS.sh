@@ -28,6 +28,20 @@ echo ""
 echo -e "${green}Hint -- Our Datbase Engine works on HADatabase Directory By Default${clear}"
 echo ""
 
+#------------------------------------------------------------------------------------------------
+#check_Constrain_Table_Name_Function 
+#------------------------------------------------------------------------------------------------
+select_from_connect_options () {
+    echo -e "${magenta}Please re-choose from the following list${clear}"
+    echo -e "${cyan}1) list table ${clear}"
+	echo -e "${cyan}2) create table ${clear}"
+    echo -e "${cyan}3) drop table ${clear}"
+    echo -e "${cyan}4) insert into table ${clear}"
+    echo -e "${cyan}5) select from table${clear}"
+    echo -e "${cyan}6) delete from table ${clear}"
+    echo -e "${cyan}7) update table ${clear}"
+    echo -e "${cyan}8) Exit ${clear}"
+}
 #Function of rechoosing 
 re_choose_from_main_list_fun () {
 	echo -e "${yellow}Hint : Choose only Number from the following list${clear}"

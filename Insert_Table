@@ -24,19 +24,20 @@ bg_cyan='\033[0;46m'
 
 Insert_Func ()
 {
-     
+     declare -a arr_column=()
+     declare -a arr_Type=()
     if [[  $1 == "" ]]; then 
 
         echo -e "${red}[ Error ] --- Can't Read Value You Entered --- ${clear}"
         Back_To_Menu
 
-    elif [[ `ls | grep -i "^$1.d$"` == "" && `ls | grep -i "^$1.m$"` == ""  ]];then
+    elif [[ `ls | grep -i "^$1.data$"` == "" && `ls | grep -i "^$1.meta$"` == ""  ]];then
         
         echo -e "${red}\n[ Error ] --- Table Name Not Exist --- ${clear}" 
         Back_To_Menu  
 
     else 
-        echo -e "${green}----------------------------------- * Insert Into Table * ------------------------------ \n${clear}"
+        echo -e "${green}*----------------------------------- * Insert Into Table * ------------------------------* \n${clear}"
 
         Insert_Values_Func $1
 
@@ -49,7 +50,7 @@ Insert_Func ()
 
 Back_To_Menu ()
 {
-        echo -e "${green}-------------------------------------- * Select Menu * ------------------------------------${clear}"
+        echo -e "${green}*-------------------------------------- * Select Menu * ------------------------------------*${clear}"
 
         select Menu in  "Insert Table Name Again" "Exit"
         do
@@ -68,7 +69,9 @@ Back_To_Menu ()
                     Back_To_Menu
                     ;;
             esac
+
         done
+        
 }
 
 #------------------------------------------------------------------------------------------------
@@ -79,26 +82,25 @@ Insert_Values_Func ()
 {
     declare val
     declare line
-    echo -e "${green}------------------------------------- * Cloumn Name * ----------------------------------${clear}"
+    echo -e "${green}*------------------------------------- * Cloumn Name * ----------------------------------*${clear}"
 
-    for j in `awk -F " " '{print $1}' "$1.m"` 
+    for j in `awk -F " " '{print $1}' "$1.meta"` 
     do 
         arr_column+=("$j")
     done
-    for j in `awk -F " " '{print $2}' "$1.m"` 
+    for j in `awk -F " " '{print $2}' "$1.meta"` 
     do 
         arr_Type+=("$j")
     done
 
-    column -t -s " " -o " --> " "$1.m"
-    echo -e "${green}-----------------------------------------------------------------------------------------${clear}"
-
-   
-    for i in "${!arr_column[@]}" 
+    awk '{ gsub(" "," ---> "); }1' "$1.meta"
+    echo -e "${green}*-----------------------------------------------------------------------------------------*${clear}"
+    seq=0
+    for i in "${!arr_column[@]}"
     do
         if [[ $i = 0 ]];then
 
-            val=$(($(wc -l $1.d | cut -d " " -f1 ) +1 ))
+            val=$(($(wc -l $1.data | cut -d " " -f1 ) +1 ))
             line=$line$val":"
 
         else
@@ -106,23 +108,30 @@ Insert_Values_Func ()
             if [[ "${arr_Type[i]}" == "int" ]]; then
                 while ! [[ $Value =~ ^[0-9]*$  ]];
                 do
-                    read -p "[ Error ] --- Enter Valid Input --- " Value
+                    read -p "[ Error ] --- $value should be int --- " Value
                 done
             elif [[ "${arr_Type[i]}" == "var" ]];then
                 while ! [[ $Value =~ ^[a-zA-Z]*$ ]];
                 do
-                    read -p "[ Error ] --- Enter Valid Input --- " Value
+                    read -p "[ Error ] --- $value should be var --- " Value
                 done
             fi
 
-            if ! [[ $i == "${!arr_column[@]}" ]];then
+            if ! [[ $i == "${#arr_column[@]}" ]];then
                 line=$line$Value":"
                 else
                 line=$line$Value
+                break
+
             fi
         fi  
     done
-echo -e $line >> "$1.d"
+
+    echo -e $line >> "$1.data"
+    line=""
+    
+    select_from_connect_options
+
 }
 
 #------------------------------------------------------------------------------------------------
