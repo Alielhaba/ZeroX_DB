@@ -59,7 +59,6 @@ select choice in "Create Database" "List Database" "Drop Database" "Connect Data
 	case $choice in 
 		"Create Database" )
             createdb
-			re_choose_from_main_list_fun
 			#Part 1-1 #--running create Database script--#
 		;;
 		"List Database" )
