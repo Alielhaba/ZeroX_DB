@@ -147,7 +147,8 @@ Creat_check_Func()
                 echo -e "${green}\n*----------------- * Create Table * -----------------*\n${clear}"
                 shopt -s extglob
                 check_Constrain_Table_Name   
-                Insert_Meta_Data_Func $name   
+                Insert_Meta_Data_Func $name  
+                break 
             ;;
             "Cancel" )
                 select_from_connect_options

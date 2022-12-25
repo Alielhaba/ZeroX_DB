@@ -53,6 +53,7 @@ Back_To_Menu () {
                 break
                 ;;
             "Exit")
+                select_from_connect_options
                 break
             ;;
             *)
