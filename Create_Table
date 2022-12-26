@@ -50,7 +50,7 @@ check_Constrain_Table_Name()
         echo -e "${yellow}--------------------------------------------------------------------${clear}"
         echo -e "${red} * Given name shoud not contain numbers.${clear}"           
         echo -e "${yellow}--------------------------------------------------------------------${clear}"
-        check_Constrain_Table_Names
+        check_Constrain_Table_Name
     else 
         echo -e "${yellow}\n--------------------------------------------------------------------${clear}"
         echo -e "${green} * The Table Is Created Successfully *${clear}"           
@@ -105,7 +105,7 @@ check_Data_Type() {
 Insert_Meta_Data_Func ()
 {
     read -p " Number of columns : " colmuns
-    if [[  $colmuns == [0-99999]  && $colmuns != "1" ]]; then
+    if [[  $colmuns == [2-99999]  && $colmuns != "1" ]]; then
         echo -e "${yellow}\n < Hint : The First Value Will be a Primary Key >\n${clear}"
         for ((i=0;i<=$(($colmuns-1));i++));
         do

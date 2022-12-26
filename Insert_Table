@@ -102,7 +102,7 @@ Insert_Values_Func ()
             fi
             if ! [[ $i == "${#arr_column[@]}" ]];then
                 line=$line$Value":"
-                else
+            else
                 line=$line$Value
                 break
             fi

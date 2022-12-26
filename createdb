@@ -41,7 +41,12 @@ add_name_check_const_Exist_fun () {
     shopt -s extglob
     while true
     do
-        if [[ $name == *[" "'!':\|'-'/=~@\$%^\&*()+';''#']* || $name == [" "'!':\|'-'/=~@\$%^\&*()+';''#']*[" "'!':\|'-'/=~@\$%^\&*()+';''#']*  ]]; then
+        if [[ $name = "exit" ]]; then
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            echo -e "${red} *  (exit) is already predefined command in the script.${clear}"           
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            break
+        elif [[ $name == *[" "'!':\|'-'/=~@\$%^\&*()+';''#']* || $name == [" "'!':\|'-'/=~@\$%^\&*()+';''#']*[" "'!':\|'-'/=~@\$%^\&*()+';''#']*  ]]; then
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
             echo -e "${red}1- Given name shoud not contain special char.${clear}"
             echo -e "${red}2- Given name shoud not contain space.${clear}"
