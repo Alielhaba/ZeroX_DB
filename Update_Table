@@ -100,7 +100,8 @@ Insert_Updated_values(){
         dtype_arr[$x]=$i
         x+=1
     done
-    echo "${dtype_arr[@]}"
+
+
     for ((i=1;i<${#arr_column[@]};i++));
     do
 
@@ -165,7 +166,6 @@ Update_Full_Data_Func ()
 
 Update_Specific_Value(){
     x=0;y=0
-    echo "${arr_column[1]}"
 
     read -p "Insert your ${arr_column[0]} " PK
 
@@ -282,7 +282,7 @@ Update_Values_Func ()
         arr_Type+=("$j")
     done
 
-    column -t -s " " -o " --> " "$1.meta"
+    echo -e "${blue}`awk '{ gsub(" "," ---> "); }1' "$1.meta"`${clear}"
 
     #calling Function to select what type of update
     Update_Menu

@@ -47,21 +47,22 @@ add_name_check_const_Exist_fun () {
             echo -e "${red}2- Given name shoud not contain space.${clear}"
             echo -e "${red}3- Given name shoud not contain number at the beginning of the name.${clear}"
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
-            add_name_check_const_Exist_fun 
             break
         elif [[ $name == [0-99999]* || $name == *[0-99999]*  ]]; then
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
             echo -e "${red} *  Given name shoud not contain numbers.${clear}"           
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
-            add_name_check_const_Exist_fun
             break
         elif [[ -e $name ]];then
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
             echo -e "${red} *  There is an existance file with the same name.${clear}"           
             echo -e "${yellow}--------------------------------------------------------------------${clear}"
-            add_name_check_const_Exist_fun
+            break
         else
             mkdir $name
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
+            echo -e "${green} *  Database is Created Successfully.${clear}"           
+            echo -e "${yellow}--------------------------------------------------------------------${clear}"
             break
         fi
     done
@@ -76,9 +77,6 @@ create_db_fun (){
         case $dbcreation in
             "Add New Database" )
                 add_name_check_const_Exist_fun
-                echo -e "${yellow}--------------------------------------------------------------------${clear}"
-                echo -e "${green} *  Database is Created Successfully.${clear}"           
-                echo -e "${yellow}--------------------------------------------------------------------${clear}"
                 break
             ;;
             "Cancel" )

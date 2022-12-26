@@ -291,7 +291,7 @@ delete_by_row_fun () {
             select numrow in "Delete row by Primary Key" "Delete by row number" "Delete rows in range" "Cancel"
             do 
                 echo -e "${bg_cyan}$numrow${clear}"
-                case $numrow in 
+                case $numrow in     
                 "Delete row by Primary Key" )
                     delete_by_pk "$tbname.data"
                 ;;
@@ -302,10 +302,11 @@ delete_by_row_fun () {
                     delete_in_range "$tbname.data"
                 ;;  
                 "Cancel" )
-                    delete_from_fun 
+                    rechoose_delete_from_options
                     break
                 esac
             done
+            break
         elif [[ -e "$tbname.meta" && -e "$tbname.data" && `cat "$tbname.data"` = "" ]];then
             echo -e "${bg_red}**Your table is EMPTY**${clear}"
             rechoose_delete_from_options
