@@ -53,7 +53,7 @@ do
     echo $i
 
 done
-} | whiptail  --gauge "Loading ZeroXDBMS-Script !" 3 30 0
+} | whiptail  --gauge "Loading ZeroXDBMS-Script !" 6 50 0
 
 echo "                                                                                                                       "
 echo -e "${blue}--------------------------------------------------------------------------------------------------------------------------------------${clear}"
